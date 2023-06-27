@@ -2,7 +2,7 @@
 //  AppDelegate.swift
 //  Spoon Benders
 //
-//  Created by Con Dog on 16.12.2021.
+//  Created by Onur Akdogan on 16.12.2021.
 //
 
 import UIKit

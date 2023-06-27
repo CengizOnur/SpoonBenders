@@ -2,7 +2,7 @@
 //  MockMqtt.swift
 //  UnitTests
 //
-//  Created by con akd on 6.07.2022.
+//  Created by Onur Akdogan on 6.07.2022.
 //
 
 @testable import Spoon_Benders
@@ -41,17 +41,7 @@ class MockMqtt: MqttProtocol {
     
     
     func publish(_ topic: String, withString string: String, qos: CocoaMQTTQoS = .qos1, retained: Bool = false) -> Int {
-//        print("🤣🤣🤣🤣🤣\(string)")
         broker.latestPublishedMessage = CocoaMQTTMessage(topic: topic, string: string)
-        broker.sendLatestPublishedMessage()
-        return 0
-    }
-    
-    
-    //
-    func publish(_ message: CocoaMQTTMessage) -> Int {
-//        print("🤣🤣🤣🤣🤣\(message.payload)")
-        broker.latestPublishedMessage = message
         broker.sendLatestPublishedMessage()
         return 0
     }

@@ -1,0 +1,6 @@
+framework module Pods_Spoon_Benders {
+  umbrella header "Pods-Spoon Benders-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -40,10 +40,10 @@ final class LobbyVC: UIViewController {
         return stackView
     }()
     
-    private let profileHost = ProfileView()
-    private let profileTwo = ProfileView()
-    private let profileThree = ProfileView()
-    private let profileFour = ProfileView()
+    private let profileHost = ProfileView(ratioOfnicknameViewToAvatar: 0.25, labelFont: UIFont(name: "Poultrygeist", size: 32))
+    private let profileTwo = ProfileView(ratioOfnicknameViewToAvatar: 0.25, labelFont: UIFont(name: "Poultrygeist", size: 32))
+    private let profileThree = ProfileView(ratioOfnicknameViewToAvatar: 0.25, labelFont: UIFont(name: "Poultrygeist", size: 32))
+    private let profileFour = ProfileView(ratioOfnicknameViewToAvatar: 0.25, labelFont: UIFont(name: "Poultrygeist", size: 32))
     
     private lazy var profileViewCandidates = [profileHost, profileTwo, profileThree, profileFour]
     private lazy var profileViews: [ProfileView] = []
@@ -60,8 +60,7 @@ final class LobbyVC: UIViewController {
     
     private var initialSetupDone = false
     private lazy var joiningApproval = player.isHost
-    
-//    private let gradientLayer = CAGradientLayer()
+    private var goingForwards = false
     
     private var constraints: [NSLayoutConstraint] = []
     private var sizeConstraintsByTraitCollection: [NSLayoutConstraint] = []
@@ -81,7 +80,7 @@ final class LobbyVC: UIViewController {
             statusStackView.leadingAnchor.constraint(greaterThanOrEqualToSystemSpacingAfter: view.safeAreaLayoutGuide.leadingAnchor, multiplier: 1),
             statusStackView.trailingAnchor.constraint(lessThanOrEqualToSystemSpacingAfter: view.safeAreaLayoutGuide.trailingAnchor, multiplier: 1),
             statusStackView.widthAnchor.constraint(greaterThanOrEqualToConstant: 300),
-            statusStackView.heightAnchor.constraint(equalToConstant: view.safeAreaLayoutGuide.layoutFrame.size.height * 1 / 6),
+            statusStackView.heightAnchor.constraint(equalToConstant: view.safeAreaLayoutGuide.layoutFrame.size.height * 1 / 12),
             statusStackView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
         ]
         
@@ -96,12 +95,13 @@ final class LobbyVC: UIViewController {
     
     
     private func setsizesByTraitCollection(newCollection: UITraitCollection) {
-        statusLabel.font = UIFont(name: "Audiowide-Regular", size: newCollection.fontSizeBySizeClass)
-        gameLabel.font = UIFont(name: "Audiowide-Regular", size: newCollection.fontSizeBySizeClass)
+        statusLabel.font = UIFont(name: "Poultrygeist", size: newCollection.fontSizeBySizeClass)
+        gameLabel.font = UIFont(name: "Poultrygeist", size: newCollection.fontSizeBySizeClass)
         
         var spacingCoefficient: CGFloat {
-            if view.frame.size.height > 950 && gameMode == .oneVsOne {
-                return 10
+            // iPad Mini (6th gen) logical width(in landscape it corresponds height): 744
+            if view.frame.size.height > 743 && gameMode == .oneVsOne {
+                return 8
             } else {
                 return 2
             }
@@ -158,13 +158,14 @@ final class LobbyVC: UIViewController {
     
     
     private func setup(gameMode: GameMode, playersCodes: [String], players: [String : [String]]) {
+        view.subviews.first?.removeFromSuperview()
         view.backgroundImage(named: "backgrounds/background\(game.gameMode.convertToString)")
         view.addSubview(gameLabel)
         view.addSubview(statusStackView)
         view.addSubview(profileStackView)
         statusView.showImageLoadingView()
         
-        let numberOfPlayers = gameMode == .oneVsOne ? 2 : 4
+        let numberOfPlayers = gameMode.convertToInt
         for i in 0 ..< numberOfPlayers {
             profileViews.append(profileViewCandidates[i])
         }
@@ -184,7 +185,6 @@ final class LobbyVC: UIViewController {
     private func approveJoining() {
         game = SpoonBenders(player: player, gameCode: gameCode, gameMode: gameMode)
         game.delegate = self
-//        view.addGradient(gradientLayer: gradientLayer, colors: [.systemPurple, .systemBlue, .white])
         guard player.isHost else {
             view.showImageLoadingView()
             timer = Timer.scheduledTimer(
@@ -203,7 +203,7 @@ final class LobbyVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
+        view.backgroundImage(named: "backgrounds/backgroundPreparation")
         approveJoining()
     }
     
@@ -224,7 +224,6 @@ final class LobbyVC: UIViewController {
         invalidateOldConstraints()
         coordinator.animate { [weak self] context in
             guard let self = self else { return }
-//            self.gradientLayer.frame = self.view.bounds
             self.activateConstraints()
         }
     }
@@ -243,10 +242,25 @@ final class LobbyVC: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        goingForwards = false
         title = gameMode.convertToString
         navigationController?.setNavigationBarHidden(false, animated: animated)
         let navigationBarAppearance = UINavigationBarAppearance()
+        let attrs = [
+            NSAttributedString.Key.foregroundColor: UIColor.white,
+            NSAttributedString.Key.font: UIFont(name: "Poultrygeist", size: 17)!
+        ]
+        navigationBarAppearance.titleTextAttributes = attrs
+        navigationBarAppearance.configureWithTransparentBackground()
         navigationItem.scrollEdgeAppearance = navigationBarAppearance
+    }
+    
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        guard !goingForwards else { return }
+        timer.invalidate()
+        if joiningApproval { game.disconnect() }
     }
     
     
@@ -256,15 +270,6 @@ final class LobbyVC: UIViewController {
         view.dismissImageLoadingView()
         presentAlert(title: "Could Not Join", message: "The game is already started or your code is invalid. You can try again.", buttonTitle: "Ok")
         navigationController?.popViewController(animated: true)
-    }
-    
-    
-    override func didMove(toParent parent: UIViewController?) {
-        super.didMove(toParent: parent)
-        if parent == nil, joiningApproval {
-            game.disconnect()
-            timer.invalidate()
-        }
     }
     
     
@@ -297,6 +302,7 @@ extension LobbyVC: SpoonBendersDelegate {
         let gameVc = GameVC(game: game, animationManager: AnimationManager(), soundManager: SoundManager())
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.goingForwards = true
             self.navigationController?.pushViewController(gameVc, animated: true)
         }
     }

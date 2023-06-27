@@ -2,7 +2,7 @@
 //  CommunicationManagerTests.swift
 //  UnitTests
 //
-//  Created by con akd on 6.07.2022.
+//  Created by Onur Akdogan on 6.07.2022.
 //
 
 @testable import Spoon_Benders
@@ -63,7 +63,7 @@ class CommunicationManagerTests: XCTestCase {
     
     
     func givenPlayerToBePlayerTwo() {
-        playerTwo = Player(playerNickname: "Cng", playerImageName: "🤪", playerCode: "2", isHost: false)
+        playerTwo = Player(playerNickname: "Gzm", playerImageName: "🤪", playerCode: "2", isHost: false)
     }
     
     
@@ -94,16 +94,6 @@ class CommunicationManagerTests: XCTestCase {
     
     // MARK: - Tests
     
-    func test_gameCommunication_conformsToCommunicationManagerService() {
-        // given
-        givenPlayerToBeHost()
-        // when
-        whenPlayerOneJoinedGame()
-        // then
-        XCTAssertTrue((sutOne as AnyObject) is CommunicationManagerService)
-    }
-
-
     func test_communicationManager_mqttSet() {
         // given
         givenPlayerToBeHost()

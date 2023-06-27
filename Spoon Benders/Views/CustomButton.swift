@@ -2,7 +2,7 @@
 //  CustomButton.swift
 //  Spoon Benders
 //
-//  Created by Con Dog on 2.03.2022.
+//  Created by Onur Akdogan on 2.03.2022.
 //
 
 import UIKit
@@ -47,7 +47,7 @@ final class CustomButton: UIButton {
         translatesAutoresizingMaskIntoConstraints = false
         layer.cornerRadius = 10
         setTitleColor(.white, for: .normal)
-        titleLabel?.font = .preferredFont(forTextStyle: .headline)
+        titleLabel?.font = UIFont(name: "Poultrygeist", size: 24)
     }
     
     

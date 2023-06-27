@@ -2,7 +2,7 @@
 //  AlertsViewController.swift
 //  Spoon Benders
 //
-//  Created by con akd on 4.01.2023.
+//  Created by Onur Akdogan on 4.01.2023.
 //
 
 import UIKit
@@ -24,13 +24,14 @@ final class AlertsViewController: UIViewController {
     }()
     
     private lazy var titleLabel: CustomLabel = {
-        let label = CustomLabel(textAlignment: .center)
+        let label = CustomLabel(textAlignment: .center, font: UIFont(name: "Poultrygeist", size: traitCollection.fontSizeBySizeClass))
+        label.textColor = .label
         label.text = alertTitle ?? "Something went wrong"
         return label
     }()
     
     private lazy var messageLabel: CustomLabel = {
-        let label = CustomLabel(textAlignment: .center)
+        let label = CustomLabel(textAlignment: .center, font: UIFont(name: "Poultrygeist", size: traitCollection.fontSizeBySizeClass))
         label.textColor = .secondaryLabel
         label.text = message ?? "Unable to complete request"
         label.numberOfLines = 4
@@ -38,7 +39,7 @@ final class AlertsViewController: UIViewController {
     }()
     
     private lazy var actionButton: CustomButton = {
-        let button = CustomButton(backgroundColor: .systemPurple, title: "Ok")
+        let button = CustomButton(backgroundColor: .clear, backgroundImage: UIImage(named: "buttons/purpleButton")!, title: "Ok")
         button.addTarget(self, action: #selector(dismissVC), for: .touchUpInside)
         button.layer.cornerRadius = 20
         return button

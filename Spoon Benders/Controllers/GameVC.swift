@@ -33,14 +33,14 @@ final class GameVC: UIViewController {
     private var playerViews: [PlayerView] = []
     private var playerViewsSizes: [CGSize] = [CGSize(), CGSize(), CGSize(), CGSize()]
     
-    private lazy var quitButton: CustomButton = {
-        let button = CustomButton(backgroundColor: .clear, title: nil, image: UIImage(systemName: "xmark"), imageSize: 24)
-        button.addTarget(self, action: #selector(quitButtonTapped), for: .touchUpInside)
+    private lazy var leaveButton: CustomButton = {
+        let button = CustomButton(backgroundColor: .clear, title: nil, image: UIImage(named: "buttons/leaveButton"), imageSize: 24)
+        button.addTarget(self, action: #selector(leaveButtonTapped), for: .touchUpInside)
         return button
     }()
     
     private lazy var soundButton: CustomButton = {
-        let button = CustomButton(backgroundColor: .clear, title: nil, image: UIImage(systemName: "speaker.wave.2"), imageSize: 24)
+        let button = CustomButton(backgroundColor: .clear, title: nil, image: UIImage(named: "buttons/soundOnButton"), imageSize: 24)
         button.addTarget(self, action: #selector(soundButtonTapped), for: .touchUpInside)
         return button
     }()
@@ -63,8 +63,6 @@ final class GameVC: UIViewController {
         return label
     }()
     
-//    private let gradientLayer = CAGradientLayer()
-    
     private var initialSetupDone = false
     private var alertPresented = false
     
@@ -79,7 +77,9 @@ final class GameVC: UIViewController {
     
     // Layouts OneVSOne
     private func layoutPortraitOneVsOne(size: CGSize) {
-        let constant = floor(size.width / 11) * 1.5
+        let coefficient = traitCollection.coefficientOfPlayerView(orientation: .portrait)
+        let constant = floor(size.width / 11) * coefficient * 8
+        
         let playerViewOneWidth = floor(constant * 2.5)
         let playerViewOneHeight = floor(constant * 6)
         
@@ -96,24 +96,26 @@ final class GameVC: UIViewController {
         portraitConstraints = [
             playerViews[0].widthAnchor.constraint(equalToConstant: playerViewOneWidth),
             playerViews[0].heightAnchor.constraint(equalToConstant: playerViewOneHeight),
-            playerViews[0].leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            playerViews[0].leadingAnchor.constraint(equalToSystemSpacingAfter: view.safeAreaLayoutGuide.leadingAnchor, multiplier: 2),
             playerViews[0].centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
                         
             playerViews[1].widthAnchor.constraint(equalToConstant: playerViewTwoWidth),
             playerViews[1].heightAnchor.constraint(equalToConstant: playerViewTwoHeight),
-            playerViews[1].trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            playerViews[1].trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             playerViews[1].centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
         ]
     }
     
     
     private func layoutLandscapeOneVsOne(size: CGSize) {
-        let constant = floor(size.height / 11 / 3) * 1.25
-        let playerViewOneHeight = floor(constant * 10 + 15)
-        let playerViewOneWidth = floor(constant * 3 * 4.5)
-
-        let playerViewTwoHeight = floor(constant * 10 + 15)
-        let playerViewTwoWidth = floor(constant * 3 * 4.5)
+        let coefficient = traitCollection.coefficientOfPlayerView(orientation: .landscape)
+        let constant = floor(size.height / 11) * coefficient * 6
+        
+        let playerViewOneWidth = floor(constant * 2.5)
+        let playerViewOneHeight = floor(constant * 6)
+        
+        let playerViewTwoWidth = floor(constant * 2.5)
+        let playerViewTwoHeight = floor(constant * 6)
         
         playerViewsSizes[0].width = playerViewOneWidth
         playerViewsSizes[0].height = playerViewOneHeight
@@ -125,20 +127,21 @@ final class GameVC: UIViewController {
         landscapeConstraints = [
             playerViews[0].widthAnchor.constraint(equalToConstant: playerViewOneWidth),
             playerViews[0].heightAnchor.constraint(equalToConstant: playerViewOneHeight),
-            playerViews[0].bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
-            playerViews[0].centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            playerViews[0].leadingAnchor.constraint(equalToSystemSpacingAfter: view.safeAreaLayoutGuide.leadingAnchor, multiplier: 4),
+            playerViews[0].centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
 
             playerViews[1].widthAnchor.constraint(equalToConstant: playerViewTwoWidth),
             playerViews[1].heightAnchor.constraint(equalToConstant: playerViewTwoHeight),
-            playerViews[1].topAnchor.constraint(equalToSystemSpacingBelow: view.safeAreaLayoutGuide.topAnchor, multiplier: 1),
-            playerViews[1].centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            playerViews[1].trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -32),
+            playerViews[1].centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
         ]
     }
     
     
     // Layouts TwoVSTwo
     private func layoutPortraitTwoVsTwo(size: CGSize) {
-        let constant = floor(size.width / 11) * 0.8
+        let coefficient = traitCollection.coefficientOfPlayerView(orientation: .portrait)
+        let constant = floor(size.width / 11) * coefficient * 6
         
         let playerViewOneWidth = floor(constant * 2.5)
         let playerViewOneHeight = floor(constant * 6)
@@ -190,7 +193,8 @@ final class GameVC: UIViewController {
     
     
     private func layoutLandscapeTwoVsTwo(size: CGSize) {
-        let constant = floor(size.height / 11 / 3) * 1.2
+        let coefficient = traitCollection.coefficientOfPlayerView(orientation: .landscape)
+        let constant = floor(size.height / 11 / 3) * coefficient * 5
         
         let playerViewOneHeight = floor(constant * 10 + 15)
         let playerViewOneWidth = floor(constant * 3 * 4.5)
@@ -243,7 +247,8 @@ final class GameVC: UIViewController {
     
     // Layouts Ffa
     private func layoutPortraitFfa(size: CGSize) {
-        let constant = floor(size.width / 11)
+        let coefficient = traitCollection.coefficientOfPlayerView(orientation: .portrait)
+        let constant = floor(size.width / 11) * coefficient * 6
         
         let playerViewOneWidth = floor(constant * 2.5)
         let playerViewOneHeight = floor(constant * 6)
@@ -295,7 +300,8 @@ final class GameVC: UIViewController {
     
     
     private func layoutLandscapeFfa(size: CGSize) {
-        let constant = floor(size.height / 11)
+        let coefficient = traitCollection.coefficientOfPlayerView(orientation: .landscape)
+        let constant = floor(size.height / 11) * coefficient * 4.25
         
         let playerViewOneWidth = floor(constant * 2.5)
         let playerViewOneHeight = floor(constant * 6)
@@ -348,38 +354,38 @@ final class GameVC: UIViewController {
     
     private func configureTimeLabel() {
         timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(fireTimer), userInfo: nil, repeats: true)
+        RunLoop.current.add(timer, forMode: .common)
         
         view.addSubview(timeLabel)
         
-        timeLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20).isActive = true
-        timeLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20).isActive = true
+        timeLabel.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -8).isActive = true
+        timeLabel.topAnchor.constraint(equalToSystemSpacingBelow: view.safeAreaLayoutGuide.topAnchor, multiplier: 1).isActive = true
         timeLabel.widthAnchor.constraint(equalToConstant: 32).isActive = true
         timeLabel.heightAnchor.constraint(equalTo: timeLabel.widthAnchor).isActive = true
-        timeLabel.layer.cornerRadius = 15
+        timeLabel.layer.cornerRadius = 16
         timeLabel.layer.backgroundColor = UIColor.black.withAlphaComponent(0.5).cgColor
     }
     
     
     private func configureSettingsButton() {
-        view.addSubview(quitButton)
+        view.addSubview(leaveButton)
         
-        quitButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20).isActive = true
-        quitButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20).isActive = true
-        quitButton.widthAnchor.constraint(equalToConstant: 32).isActive = true
-        quitButton.heightAnchor.constraint(equalTo: quitButton.widthAnchor).isActive = true
-        quitButton.layer.cornerRadius = 15
-        quitButton.layer.backgroundColor = UIColor.black.withAlphaComponent(0.5).cgColor
+        leaveButton.leadingAnchor.constraint(equalToSystemSpacingAfter: view.safeAreaLayoutGuide.leadingAnchor, multiplier: 1).isActive = true
+        leaveButton.topAnchor.constraint(equalToSystemSpacingBelow: view.safeAreaLayoutGuide.topAnchor, multiplier: 1).isActive = true
+        leaveButton.widthAnchor.constraint(equalToConstant: 32).isActive = true
+        leaveButton.heightAnchor.constraint(equalTo: leaveButton.widthAnchor).isActive = true
+        leaveButton.layer.cornerRadius = 16
     }
     
     
     private func configureSoundButton() {
         view.addSubview(soundButton)
         
-        soundButton.leadingAnchor.constraint(equalTo: quitButton.trailingAnchor, constant: 10).isActive = true
-        soundButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20).isActive = true
+        soundButton.leadingAnchor.constraint(equalToSystemSpacingAfter: view.safeAreaLayoutGuide.leadingAnchor, multiplier: 1).isActive = true
+        soundButton.topAnchor.constraint(equalToSystemSpacingBelow: leaveButton.bottomAnchor, multiplier: 1).isActive = true
         soundButton.widthAnchor.constraint(equalToConstant: 32).isActive = true
         soundButton.heightAnchor.constraint(equalTo: soundButton.widthAnchor).isActive = true
-        soundButton.layer.cornerRadius = 15
+        soundButton.layer.cornerRadius = 16
         soundButton.layer.backgroundColor = UIColor.black.withAlphaComponent(0.5).cgColor
     }
     
@@ -403,7 +409,7 @@ final class GameVC: UIViewController {
         } else {
             layoutLandscapeOneVsOne(size: size)
             NSLayoutConstraint.activate(landscapeConstraints)
-            let positions: [Position] = [.rightOrBottom, .leftOrTop]
+            let positions: [Position] = [.leftOrTop, .rightOrBottom]
             configureLayoutHelper(accordingly: positions)
         }
     }
@@ -451,8 +457,6 @@ final class GameVC: UIViewController {
     
     
     private func layoutAppropriatelyForGameMode(size: CGSize) {
-//        gradientLayer.frame = view.bounds
-        
         switch game.gameMode {
         case .oneVsOne:
             playerViews[0].bendersPosition = .left
@@ -468,7 +472,8 @@ final class GameVC: UIViewController {
     }
     
     
-    private func setUpHelper(_ playerOneCode: String, numberOfPlayers: Int) {
+    private func setUpHelper(_ playerOneCode: String) {
+        let numberOfPlayers = game.gameMode.convertToInt
         for i in 0 ..< numberOfPlayers {
             let playerCode = game.trios[i]
             let avatarName = game.playersAndAvatars[playerCode]!
@@ -487,7 +492,7 @@ final class GameVC: UIViewController {
         
         if game.gameMode != .ffa {
             configureTimeLabel()
-            if game.isMyTurn { soundManager.playSound() }
+            if game.isMyTurn { play(sound: .turn) }
         }
     }
     
@@ -509,15 +514,7 @@ final class GameVC: UIViewController {
         animationManager.animator = self
         
         let thisPlayerCode = game.getThisPlayerCode()
-        
-        switch game.gameMode {
-        case .oneVsOne:
-            setUpHelper(thisPlayerCode, numberOfPlayers: 2)
-        case .twoVsTwo:
-            setUpHelper(thisPlayerCode, numberOfPlayers: 4)
-        case .ffa:
-            setUpHelper(thisPlayerCode, numberOfPlayers: 4)
-        }
+        setUpHelper(thisPlayerCode)
     }
     
     
@@ -526,7 +523,6 @@ final class GameVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setUp()
-//        print("1:playersCodes " ,game.playerCodes)
     }
     
     
@@ -544,6 +540,7 @@ final class GameVC: UIViewController {
         super.viewWillTransition(to: size, with: coordinator)
         guard size != view.bounds.size else { return }
         invalidateOldConstraints()
+        collectionViews.forEach { $0.collectionViewLayout.invalidateLayout() }
         coordinator.animate { [weak self] context in
             guard let self = self else { return }
             let safeAreaSize = self.view.safeAreaLayoutGuide.layoutFrame.size
@@ -617,12 +614,8 @@ final class GameVC: UIViewController {
     // MARK: - Timer
     
     @objc private func fireTimer() {
-//        if time == 6 {
-//            game.turnSwitch = true
-//        }
         time -= 1
         if time == 3 { timeLabel.textColor = game.isMyTurn ? .systemRed : .white }
-//        print(game.isMyTurn)
         if time == 1 {
             if game.isMyTurn {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -631,9 +624,9 @@ final class GameVC: UIViewController {
             }
         }
         if time == 0 {
-            game.isMyTurn = false
             timer.invalidate()
-            game.sendApproveTimeIsUp()
+            self.game.isMyTurn = false
+            self.game.sendApproveTimeIsUp()
         }
     }
     
@@ -657,21 +650,23 @@ final class GameVC: UIViewController {
     func resetTimer() {
         guard game.turnBased, !game.attackStarted else { return }
         timer.invalidate()
+        game.turnSwitch = true
         time = 6
         showCurrentPlayer()
         if game.isMyTurn {
-            soundManager.playSound()
+            play(sound: .turn)
             timeLabel.textColor = .systemGreen
         } else {
             timeLabel.textColor = .white
         }
         timer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(fireTimer), userInfo: nil, repeats: true)
+        RunLoop.current.add(timer, forMode: .common)
     }
     
     
     // MARK: - Buttons Tapped
     
-    @objc private func quitButtonTapped() {
+    @objc private func leaveButtonTapped() {
         if let nav = self.navigationController {
             game.disconnect()
             timer.invalidate()
@@ -684,9 +679,9 @@ final class GameVC: UIViewController {
     @objc private func soundButtonTapped() {
         soundManager.isSoundOpen.toggle()
         if soundManager.isSoundOpen {
-            soundButton.updateButton(with: UIImage(systemName: "speaker.wave.2"), tintColor: .white)
+            soundButton.updateButton(with: UIImage(named: "buttons/soundOnButton"), tintColor: .white)
         } else {
-            soundButton.updateButton(with: UIImage(systemName: "speaker.slash"), tintColor: .white)
+            soundButton.updateButton(with: UIImage(named: "buttons/soundOffButton"), tintColor: .white)
         }
     }
     
@@ -694,8 +689,6 @@ final class GameVC: UIViewController {
     // MARK: - Helper Functions
     
     private func takeCellLocation(collectionView: UICollectionView, index: Int) -> CGPoint {
-//        print("\n---takeCellLocation, \(getPlayerFromCv(collectionView: collectionView))---")
-//        print(index)
         let cell = collectionView.cellForItem(at: IndexPath(row: index, section: 0)) as! BenderCell
         let cellRectCenter = cell.center
         let originInRootView = collectionView.convert(cellRectCenter, to: self.view)
@@ -751,6 +744,11 @@ extension GameVC: SpoonBendersDelegate {
     func updateProperly() {
         configureDataSourcesAndUpdate()
     }
+    
+    
+    func play(sound: SoundType) {
+        soundManager.play(sound)
+    }
 }
 
 
@@ -759,7 +757,6 @@ extension GameVC: SpoonBendersDelegate {
 extension GameVC: BenderSelection {
     
     func didSelectBender(onPlayer: String, at: IndexPath) {
-//        print("🥹didSelectBender-3")
         game.selectBender(onPlayer: onPlayer, at: at.row)
     }
 }
@@ -793,8 +790,6 @@ extension GameVC: AnimationManagerDelegate {
     
     
     func startHealthDecreasingAnimation(by opponentsAttack: Int, currentlyDefendingPlayer: String, currentlyDefendingBenderIndex: Int) {
-//        print("\n---startHealthDecreasingAnimation, \(defendingPlayer)---")
-//        print(defenderBenderIndex)
         let currentlyDefendingPlayersCollectionView = getCollectionViewFrom(playerCode: currentlyDefendingPlayer)
         view.layoutIfNeeded()
         let defenderBenderPosition = takeCellLocation(collectionView: currentlyDefendingPlayersCollectionView, index: currentlyDefendingBenderIndex)

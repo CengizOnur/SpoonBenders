@@ -2,7 +2,7 @@
 //  CustomLabel.swift
 //  Spoon Benders
 //
-//  Created by Con Dog on 19.05.2022.
+//  Created by Onur Akdogan on 19.05.2022.
 //
 
 import UIKit
@@ -20,7 +20,7 @@ final class CustomLabel: UILabel {
     }
     
     
-    convenience init(textAlignment: NSTextAlignment = .center, font: UIFont? = UIFont(name: "Audiowide-Regular", size: 12)) {
+    convenience init(textAlignment: NSTextAlignment = .center, font: UIFont? = UIFont(name: "Poultrygeist", size: 12)) {
         self.init(frame: .zero)
         self.textAlignment = textAlignment
         self.font = font

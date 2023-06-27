@@ -2,7 +2,7 @@
 //  CustomImageView.swift
 //  Spoon Benders
 //
-//  Created by con akd on 17.11.2022.
+//  Created by Onur Akdogan on 17.11.2022.
 //
 
 import UIKit

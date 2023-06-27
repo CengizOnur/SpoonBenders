@@ -24,7 +24,6 @@ extension GameCommunicationDelegate {
     func moveMade(by player: String, onTrio: String, at index: Int) { }
     func didPlayersUpdated() { }
     func startGame() { }
-    func didClean() { }
 }
 
 
@@ -47,14 +46,11 @@ final class GameCommunication {
     var gameMode: GameMode
     var gameStarted = false
     
-    /// To track players moves for synchronized game experience
+    /// To track players moves for getting synchronized game experience
     var moveState = 0
     
     /// To track timer synchronization
     var timeIsUp = 0
-    
-    /// To track whether attack has been already in progress or not
-    var attackStarted: [String : String] = [:]
     
     private lazy var numberOfPlayers = gameMode == .oneVsOne ? 2 : 4
     
@@ -108,10 +104,7 @@ final class GameCommunication {
     
     
     func newPlayerJoined(newPlayerAttributes: String) {
-        print("newPlayerJoined-playersCodes:\(playersCodes)")
-        print("newPlayerJoined-newPlayerAttributes:\(newPlayerAttributes)")
-        guard !gameStarted else { return }
-        guard players.count < numberOfPlayers else { return }
+        guard !gameStarted, players.count < numberOfPlayers else { return }
         let newPlayer = convertStringPlayersToArray(from: newPlayerAttributes)
         let newPlayersCode = newPlayer[0]
         guard !playersCodes.contains(newPlayersCode) else { return }
@@ -161,8 +154,6 @@ final class GameCommunication {
     
     func checkWeAreReady() {
         if numberOfPlayers == playersAndBenders.count {
-            print("\n------")
-            print("\(players)\n")
             gameStarted = true
             delegate?.startGame()
         }
@@ -194,9 +185,8 @@ final class GameCommunication {
             player.isHost = true
         }
         delegate?.didPlayerDrop(playerCode: playerCode)
-        delegate?.didPlayersUpdated()
         guard player.isHost else { return }
-        
+        delegate?.didPlayersUpdated()
         publishMessage(message: "\(players.description)-\(playersCodes.description)")
     }
     
@@ -204,23 +194,11 @@ final class GameCommunication {
     // MARK: - Handle Functions
     
     func handleTimeIsUp(message: String) {
-        print(message)
         let components = message.description.components(separatedBy: "-")
         let moveStateString = components[1].components(separatedBy: ":")[1]
         let moveState = Int(moveStateString)!
         guard self.moveState == moveState else { return }
-        var status = ""
-        attackStarted.forEach { (_, value) in
-            if value == "Started" {
-                status = value
-            }
-        }
-//        guard status != "Started" else {
-//            print("❌Started")
-//            return
-//        }
         timeIsUp += 1
-        print(timeIsUp)
         if timeIsUp == playersCodes.count {
             timeIsUp = 0
             self.moveState += 1
@@ -239,14 +217,6 @@ final class GameCommunication {
     }
     
     
-    func handleAttackStarted(message: String) {
-        let msg = message.description.components(separatedBy: "-")
-        let situtation = msg[1].components(separatedBy: ":")[0]
-        let player = msg[1].components(separatedBy: ":")[1]
-        attackStarted[player] = situtation
-    }
-    
-    
     func handleMove(move: String) {
         let message = move.description.components(separatedBy: "=>")
         let moveState = message[0].components(separatedBy: ":")[1]
@@ -260,8 +230,8 @@ final class GameCommunication {
     
     
     func handleApprovedMove(message: String) {
-        /// Lets say:
-        /// - MoveBy:165-MoveOn:141-WhichBender:2-MoveState:6
+        /// let's say:
+        /// - MoveBy:165-MoveOn:183-WhichBender:2-MoveState:6
         ///
         let components = message.components(separatedBy: "-")
         /// 165
@@ -291,10 +261,6 @@ final class GameCommunication {
         case let msg where msg.string!.split(separator: ":")[0] == "TimeIsUp":
             guard player.isHost else { return }
             handleTimeIsUp(message: msg.string!)
-        
-        case let msg where msg.string!.split(separator: "-")[0] == "Attack":
-            guard player.isHost else { return }
-            handleAttackStarted(message: message.string!)
         
         case let msg where msg.string!.split(separator: ":")[0] == "MoveState":
             guard player.isHost else { return }
@@ -400,19 +366,21 @@ extension GameCommunication {
     }
     
     func TRACE(_ message: String = "", fun: String = #function) {
-        let names = fun.components(separatedBy: ":")
-        var prettyName: String
-        if names.count == 2 {
-            prettyName = names[0]
-        } else {
-            prettyName = names[1]
-        }
-        
-        if fun == "mqttDidDisconnect(_:withError:)" {
-            prettyName = "didDisconnect"
-        }
+        /*
+         let names = fun.components(separatedBy: ":")
+         var prettyName: String
+         if names.count == 2 {
+             prettyName = names[0]
+         } else {
+             prettyName = names[1]
+         }
+         
+         if fun == "mqttDidDisconnect(_:withError:)" {
+             prettyName = "didDisconnect"
+         }
 
-//        print("[TRACE] [\(prettyName)]: \(message)")
+         print("[TRACE] [\(prettyName)]: \(message)")
+         */
     }
 }
 
@@ -500,9 +468,3 @@ extension GameCommunication: Equatable {
         return lhs.player.playerCode == rhs.player.playerCode
     }
 }
-
-protocol CommunicationManagerService {
-    
-}
-
-extension GameCommunication: CommunicationManagerService { }

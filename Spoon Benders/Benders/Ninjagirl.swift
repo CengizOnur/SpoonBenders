@@ -2,39 +2,41 @@
 //  Ninjagirl.swift
 //  Spoon Benders
 //
-//  Created by con akd on 20.07.2022.
+//  Created by Onur Akdogan on 20.07.2022.
 //
 
 import Foundation
 
 // MARK: - Individual Ninjagirl
 
-class IndividualNinjagirl: IndividualBender {
+final class IndividualNinjagirl: IndividualBender {
     
     var name: String
     var imageName: String
     var fullHealth: Int
     var health: Int {
         didSet {
-            if health == 0 {
+            if health <= 0 {
+                health = 0
                 state = .gaveUp
             }
         }
     }
     var attack: Int
-    var state: BenderState = .idle
+    var state: BenderState
     weak var opponent: Bender? {
         didSet {
             attack += getBonusAgainstOpponent(attacker: self, defender: opponent)
         }
     }
     
-    init(name: String = "Ninjagirl", imageName: String = "ninjagirl", fullHealth: Int = 100, health: Int = 100, attack: Int = 50) {
+    init(name: String = "Ninjagirl", imageName: String = "ninjagirl", fullHealth: Int = 100, health: Int = 100, attack: Int = 50, state: BenderState = .idle) {
         self.name = name
         self.imageName = imageName
         self.fullHealth = fullHealth
         self.health = health
         self.attack = attack
+        self.state = state
     }
     
     
@@ -47,20 +49,21 @@ class IndividualNinjagirl: IndividualBender {
 
 // MARK: - Teammate Ninjagirl
 
-class TeammateNinjagirl: TeammateBender {
+final class TeammateNinjagirl: TeammateBender {
     
     var name: String
     var imageName: String
     var fullHealth: Int
     var health: Int {
         didSet {
-            if health == 0 {
+            if health <= 0 {
+                health = 0
                 state = .gaveUp
             }
         }
     }
     var attack: Int
-    var state: BenderState = .idle
+    var state: BenderState
     
     weak var opponent: Bender? {
         didSet {
@@ -74,12 +77,13 @@ class TeammateNinjagirl: TeammateBender {
         }
     }
     
-    init(name: String = "Ninjagirl", imageName: String = "ninjagirl", fullHealth: Int = 100, health: Int = 100, attack: Int = 50, bonusAttackPoint: Int = 0) {
+    init(name: String = "Ninjagirl", imageName: String = "ninjagirl", fullHealth: Int = 100, health: Int = 100, attack: Int = 50, state: BenderState = .idle) {
         self.name = name
         self.imageName = imageName
         self.fullHealth = fullHealth
         self.health = health
         self.attack = attack
+        self.state = state
     }
     
     

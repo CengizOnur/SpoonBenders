@@ -2,7 +2,7 @@
 //  MqttProtocol.swift
 //  Spoon Benders
 //
-//  Created by con akd on 6.07.2022.
+//  Created by Onur Akdogan on 6.07.2022.
 //
 
 import CocoaMQTT

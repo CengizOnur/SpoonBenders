@@ -2,7 +2,7 @@
 //  Player.swift
 //  Spoon Benders
 //
-//  Created by Con Dog on 3.03.2022.
+//  Created by Onur Akdogan on 3.03.2022.
 //
 
 import Foundation

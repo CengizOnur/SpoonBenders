@@ -2,7 +2,7 @@
 //  BenderCell.swift
 //  Spoon Benders
 //
-//  Created by Con Dog on 2.02.2022.
+//  Created by Onur Akdogan on 2.02.2022.
 //
 
 import UIKit
@@ -70,7 +70,6 @@ final class BenderCell: UICollectionViewCell {
     // MARK: - Set and Update Bender on Cell
     
     func setAndUpdateBenderOnCell(bender: Bender, benderPosition: BenderPosition) {
-//        print("🥹setAndUpdateBenderOnCell-5")
         benderImageView.stopAnimating()
         benderImageView.animationImages = animatedImages(for: bender.imageName, state: bender.state, benderPosition: benderPosition)
         benderImageView.animationDuration = 1.1

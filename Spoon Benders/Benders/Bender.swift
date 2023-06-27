@@ -2,7 +2,7 @@
 //  Bender.swift
 //  Spoon Benders
 //
-//  Created by con akd on 19.07.2022.
+//  Created by Onur Akdogan on 19.07.2022.
 //
 
 import Foundation
@@ -61,7 +61,7 @@ protocol BenderFactory {
 
 // MARK: - Concrete Factories
 
-class IndividualBenderFactory: BenderFactory {
+final class IndividualBenderFactory: BenderFactory {
     
     func createCat() -> Bender { return IndividualCat() }
     func createKitten() -> Bender { return IndividualKitten() }
@@ -78,7 +78,7 @@ class IndividualBenderFactory: BenderFactory {
 }
 
 
-class TeammateBenderFactory: BenderFactory {
+final class TeammateBenderFactory: BenderFactory {
     
     func createCat() -> Bender { return TeammateCat() }
     func createKitten() -> Bender { return TeammateKitten() }
@@ -101,6 +101,9 @@ extension Bender {
     
     func getCooperationAttackBonus(bender: Bender, teammateBender: Bender?) -> Int {
         switch (bender, teammateBender) {
+        case (is TeammateKitten, nil):
+            let negativeEffectOfBeingAbandoned = -2
+            return negativeEffectOfBeingAbandoned
         case (_, nil):
             let negativeEffectOfBeingAbandoned = -10
             return negativeEffectOfBeingAbandoned
@@ -132,6 +135,8 @@ extension Bender {
             return 5
         case ("Ninjagirl", "Robot"):
             return 5
+        case ("Kitten", "Robot"):
+            return 55
         default:
             return 0
         }

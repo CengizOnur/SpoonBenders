@@ -2,7 +2,7 @@
 //  SpoonBenders.swift
 //  Spoon Benders
 //
-//  Created by Con Dog on 25.02.2022.
+//  Created by Onur Akdogan on 25.02.2022.
 //
 
 import Foundation
@@ -14,6 +14,7 @@ protocol SpoonBendersDelegate: AnyObject {
     func goForGameVc()
     
     /// In Game Functions
+    func play(sound: SoundType)
     func attack(by playerCode: String, defendersTrio: String, attackerBenderIndex: Int, defenderBenderIndex: Int, duelType: DuelType)
     func updateProperly()
     func resetTimer()
@@ -27,6 +28,7 @@ extension SpoonBendersDelegate {
     func updateWaitingPlayers() { }
     func goForGameVc() { }
     
+    func play(sound: SoundType) { }
     func attack(by playerCode: String, defendersTrio: String, attackerBenderIndex: Int, defenderBenderIndex: Int, duelType: DuelType) { }
     func updateProperly() { }
     func resetTimer() { }
@@ -58,8 +60,7 @@ final class SpoonBenders {
     var isMyTurn: Bool {
         get {
             guard turnBased else { return true }
-            guard !attackStarted else { return false }
-            guard !losers.contains(getCurrentPlayersCode()) else { return false }
+            guard !attackStarted, !losers.contains(getCurrentPlayersCode()) else { return false }
             return state % numberOfPlayers == getThisPlayersGlobalIndex()
         } set { }
     }
@@ -93,12 +94,8 @@ final class SpoonBenders {
     
     var attackStarted: Bool = false {
         didSet {
-            print("\n")
             guard !gameFinished, turnBased, !attackStarted else { return }
             while losers.contains(getCurrentPlayersCode()) { state += 1 }
-//            print("\n__***___")
-//            print(gameCommunication.moveState)
-//            print("***")
             delegate?.resetTimer()
         }
     }
@@ -118,34 +115,29 @@ final class SpoonBenders {
     // MARK: - Make a Move
     
     func selectBender(onPlayer: String, at index: Int) {
-//        print("🥹selectBender-4")
-//        print(playerCodes)
-//        print(losers)
-//        print(teammates)
-//        print("1️⃣\(isMyTurn)")
-        guard turnSwitch else { return }
-        guard !gameFinished else { return }
+        guard turnSwitch, !gameFinished, isMyTurn, !losers.contains(onPlayer) else { return }
+        
         if gameMode == .twoVsTwo,
            attackStarted { return }
-        print("\n")
-//        print(isMyTurn)
-        guard isMyTurn else { return }
-        guard !losers.contains(onPlayer) else { return }
         
         /// Check if there is no right to select more bender
-        if let movesByPlayer = moves[trios[0]] {
-            guard movesByPlayer.count < 2 else { return }
+        if let movesByPlayer = moves[trios[0]], movesByPlayer.count >= 2 { return }
+        
+        /// If game is 2v2 and this player is trying to select teammates bender (trios[0] => this player,  trios[1] => teammate)
+        if gameMode == .twoVsTwo,
+            onPlayer == trios[1] {
+            delegate?.play(sound: .notSelected)
+            return
         }
         
-        /// If game is 2v2 and current player is trying to select teammates bender
-        if gameMode == .twoVsTwo,
-            onPlayer == trios[1] { return }
-        
-        /// Index of player to move on
+        /// Index of player to make a move on it (It can be any player including itself)
         let indexOfPlayer = getPlayersLocalIndex(playerCode: onPlayer)
         
         /// If current player is trying to select bender that gave up already
-        guard benders[indexOfPlayer][index].state != .gaveUp else { return }
+        guard benders[indexOfPlayer][index].state != .gaveUp else {
+            delegate?.play(sound: .notSelected)
+            return
+        }
         
         /// If bender is already selected
         if let items = selectedItems[onPlayer] {
@@ -154,29 +146,39 @@ final class SpoonBenders {
             }
         }
         
-        let myMove = "MoveState:\(gameCommunication.moveState)=>MoveBy:\(trios[0])-MoveOn:\(onPlayer)-WhichBender:\(index)"
+        delegate?.play(sound: .select)
+        
+        let thisPlayersMove = "MoveState:\(gameCommunication.moveState)=>MoveBy:\(trios[0])-MoveOn:\(onPlayer)-WhichBender:\(index)"
         
         /// MQTT - publish message
-        /// MoveBy:165-MoveOn:141-WhichBender:2
-        gameCommunication.publishMessage(message: myMove)
+        /// MoveBy:165-MoveOn:183-WhichBender:2
+        gameCommunication.publishMessage(message: thisPlayersMove)
     }
     
     
     func makeAMove(playerCode: String, trio: String, index: Int) {
-//        print("\n")
-//        benders.flatMap { $0 }.forEach { print($0.state) }
-        // let say: "165" : [cv1 : 4, cv3 : 5]
-        // "165" : [....?]  It exists.
-        guard let movesByPlayer = moves[playerCode] else {  // If the player has not played yet // "165" : [...?] It doesn't exist
+        /// moves => [String : [String : Int]]
+        /// playerCode : [trio : index]
+        /// trio corresponds collectionView(cv) in ViewController
+        /// Ex: "165" (current player who made this move) => cv1, "183" (opponent of current player) => cv2
+        /// "165" : ["183" : 2, "165" : 0]
+        
+        /// If the player has not played yet =>  "165" : [...?] It doesn't exist
+        /// "165" : [:]
+        /// "165" : [cv2 : 2]
+        guard let movesByPlayer = moves[playerCode] else {
             checkAndUpdateSelectedItems(trio: trio, index: index)
-            moves[playerCode] = [:]     // "165" : [:]
-            moves[playerCode]![trio] = index  // "165" : [cv2 : 1]
+            moves[playerCode] = [:]
+            moves[playerCode]![trio] = index
             updateProperly()
-//            benders.flatMap { $0 }.forEach { print($0.state) }
             return
         }
         
-        let cvSelectedBefore = movesByPlayer.first!.key   // cv1 (let old cv = cv1: [2, 4, 5])  // cv1
+        /// movesByPlayer can not have more than 1 elements. If it is 2, there will be attack and then it will reset.
+        /// trio => "183" (corresponds cv2)
+        let cvSelectedBefore = movesByPlayer.first!.key
+        
+        /// index => 2
         let indexSelectedBefore = movesByPlayer.first!.value
 
         arrangeSelections(playerCode: playerCode, trio: trio, index: index, trioSelectedBefore: cvSelectedBefore, indexSelectedBefore: indexSelectedBefore)
@@ -189,40 +191,60 @@ final class SpoonBenders {
     
     
     func arrangeSelections(playerCode: String, trio: String, index: Int, trioSelectedBefore: String, indexSelectedBefore: Int) {
-        // let say cv2 belongs te me.
-        if trioSelectedBefore != playerCode && trio != playerCode {   // cv1 and cv3 are not belong to player // I decide to change my first item to attack on it. cv1:4 -> cv3:5
-            selectedItems[trioSelectedBefore] = selectedItems[trioSelectedBefore]!.filter { $0 != indexSelectedBefore }   // No need to check if it is nil because I already know I selected it before.   // cv1: [2, 4, 5] -> [2, 5] (2 and 5 in cv1 are selected by other players.)
+        /// Ex: cv1 belongs to current player who made this move
+        /// cv2 and cv3 are not belong to current player and that player decide to change item to attack on it.     cv3 : 1 -> cv2 : 2
+        if trioSelectedBefore != playerCode && trio != playerCode {
+            
+            /// selectedItems => [String : [Int]]
+            /// trio : [Int, Int]
+            /// Ex: cv3 : [0, 1, 2] -> cv3 : [0, 2] (0 and 2 in cv3 are selected by other players and their colors are red)
+            selectedItems[trioSelectedBefore] = selectedItems[trioSelectedBefore]!.filter { $0 != indexSelectedBefore }
             checkAndUpdateSelectedItems(trio: trio, index: index)
-            moves[playerCode]![trioSelectedBefore] = nil      // ("165"->) [cv1 : 4] -> ("165"->) []
-            moves[playerCode]![trio] = index      // ("165"->) [cv3 : 5]
-        } else if trioSelectedBefore == playerCode && trio == playerCode { // cv2 and cv2 are belong to player // I decide to change my first item as my bender. cv2:2 -> cv2:1
-            selectedItems[trioSelectedBefore] = selectedItems[trioSelectedBefore]!.filter { $0 != indexSelectedBefore }   // cv2: [0, 2, 4] -> [0 ,4] (0 and 4 in cv2 are selected by other players.)
+            
+            /// "165" : ["127" : 1] -> "165" : ["183" : 2]  ("165" corresponds cv1, "127" corresponds cv3 and "183" corresponds cv2)
+            moves[playerCode]![trioSelectedBefore] = nil
+            moves[playerCode]![trio] = index
+            
+        /// cv1 is belongs to current player and that player decide to change item as that players own bender.      cv1 : 2 -> cv1 : 0
+        } else if trioSelectedBefore == playerCode && trio == playerCode {
+            
+            /// cv1 : [1, 2] -> cv1 : [1] (1 is selected by someone else)
+            selectedItems[trioSelectedBefore] = selectedItems[trioSelectedBefore]!.filter { $0 != indexSelectedBefore }
             checkAndUpdateSelectedItems(trio: trio, index: index)
-            moves[playerCode]![trioSelectedBefore] = nil      // ("165"->) [cv2 : 2] -> ("165"->) []
-            moves[playerCode]![trio] = index      // ("165"->) [cv2 : 1]
-        } else {    // cv3 is not belong to player and cv2 is belong to player // I decide to attack with my bender (cv2: 1) to another (cv4: 5).
+            
+            /// "165" : ["165" : 2] -> "165" : ["165" : 0]
+            moves[playerCode]![trioSelectedBefore] = nil
+            moves[playerCode]![trio] = index
+            
+        /// cv1 is belongs to current player, cv2 belongs to opponent and current player decide to attack on it.      cv1 : 0, cv2 : 2 (Bender at index 0 on cv1 will attack bender at index 2 on cv2)
+        } else {
             checkAndUpdateSelectedItems(trio: trio, index: index)
-            moves[playerCode]![trio] = index  // ("165"->) [cv2 : 1, cv4: 5]
+            
+            /// "165" : ["165" : 0, "183" : 2]
+            moves[playerCode]![trio] = index
         }
         updateProperly()
     }
     
     
     func checkAndUpdateSelectedItems(trio: String, index: Int) {
-        if selectedItems[trio] != nil {   // cv3: [1,2]
-            selectedItems[trio]!.append(index)    // cv3: [1, 2, 3]    (1 and 2 in cv3 are selected by other players.)
-        } else {                                    // if there is no cv3 yet (If cv3 is not selected yet)
-            selectedItems[trio] = []      //  cv3: []
-            selectedItems[trio]!.append(index)    // cv3: [3]
+        /// selectedItems => [String : [Int]]
+        /// trio : [Int, Int]
+        
+        /// "183" : [0, 1] -> "183" : [0, 1, 2]
+        if selectedItems[trio] != nil {
+            selectedItems[trio]!.append(index)
+            
+        /// "183" : [] -> "183" : [2]
+        } else {
+            selectedItems[trio] = []
+            selectedItems[trio]!.append(index)
         }
     }
     
     
     func takeAction(playerCode: String, movesByPlayer: [String : Int]) {
-//        print("takeAction")
         if gameMode == .twoVsTwo {
-//            let teammateCode = getTeammateCode(playerCode: playerCode)
-//            teammates[playerCode] = teammateCode
             waitingMoves[playerCode] = movesByPlayer
             if isFirstPlayerInTeam(playerCode: playerCode) {
                 state += 1
@@ -243,7 +265,8 @@ final class SpoonBenders {
     
     
     func attack(playerCode: String, movesByPlayer: [String : Int], duelType: DuelType) {
-        toggleAttackStarted(byPlayer: playerCode, to: true)
+        guard !gameFinished else { return }
+        attackStarted = true
         
         let attackerBenderIndex = movesByPlayer[playerCode]!
         let defendersTrio = movesByPlayer.keys.filter{ $0 != playerCode }.first!
@@ -255,6 +278,7 @@ final class SpoonBenders {
         setBenderStates(when: "beforeAttackAnimation", attackerBender: &attackerBender, defenderBender: &defenderBender, duelType: duelType)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.delegate?.play(sound: .attack)
             self.delegate?.attack(by: playerCode, defendersTrio: defendersTrio, attackerBenderIndex: attackerBenderIndex, defenderBenderIndex: defenderBenderIndex, duelType: duelType)
         }
     }
@@ -263,6 +287,7 @@ final class SpoonBenders {
     // MARK: - Duel
     
     func prepareDuel(attackerPlayerCode: String, duelType: DuelType) {
+        guard !gameFinished else { return }
         guard let movesByPlayer = moves[attackerPlayerCode] else { return }
         
         let keys = [String](movesByPlayer.keys)
@@ -290,6 +315,7 @@ final class SpoonBenders {
     
     
     func makeDuel(movesByPlayer: [String : Int], attackerPlayerCode: String, defenderPlayerCode: String, attackerBender: Bender, defenderBender: Bender, teammateBender: Bender?, attackerBenderIndex: Int, defenderBenderIndex: Int, duelType: DuelType) {
+        guard !gameFinished else { return }
         if duelType == .firstAttack {
             duel(currentlyDefendingPlayerTrio: defenderPlayerCode, currentlyDefendingBenderIndex: defenderBenderIndex, currentlyAttackingBender: attackerBender, currentlyDefendingBender: defenderBender, currentlyAttackingBendersTeammateBender: teammateBender)
             updateProperly()
@@ -298,15 +324,11 @@ final class SpoonBenders {
             if defenderBender.health == 0 {
                 waitingMoves[attackerPlayerCode] = nil
                 updateAfterAttack(attackerPlayer: attackerPlayerCode, defenderPlayer: defenderPlayerCode, attackerBenderIndex: attackerBenderIndex, defenderBenderIndex: defenderBenderIndex)
-                if gameMode == .twoVsTwo {
-                    
-                    /// After first attack, if duel is finished and If there is teammates waiting move, it should wait for it.
-                    if waitingMoves[teammates[attackerPlayerCode]!] != nil {
-                        return
-                    }
-                }
-//                attackStarted = false
-                toggleAttackStarted(byPlayer: attackerPlayerCode, to: false)
+                
+                /// After first attack, if duel is finished and If there is teammates waiting move, it should wait for it.
+                if gameMode == .twoVsTwo, waitingMoves[teammates[attackerPlayerCode]!] != nil { return }
+                
+                attackStarted = false
                 return
             }
             
@@ -318,9 +340,7 @@ final class SpoonBenders {
             duel(currentlyDefendingPlayerTrio: attackerPlayerCode, currentlyDefendingBenderIndex: attackerBenderIndex, currentlyAttackingBender: defenderBender, currentlyDefendingBender: attackerBender, currentlyAttackingBendersTeammateBender: nil)
             updateAfterAttack(attackerPlayer: attackerPlayerCode, defenderPlayer: defenderPlayerCode, attackerBenderIndex: attackerBenderIndex, defenderBenderIndex: defenderBenderIndex)
             
-//            print("makeDuel-attackStarted = false")
-//            attackStarted = false
-            toggleAttackStarted(byPlayer: attackerPlayerCode, to: false)
+            attackStarted = false
             waitingMoves[attackerPlayerCode] = nil
         }
     }
@@ -334,9 +354,6 @@ final class SpoonBenders {
         }
         currentlyAttackingBender.opponent = currentlyDefendingBender
         currentlyDefendingBender.health = currentlyDefendingBender.health - currentlyAttackingBender.attack
-        if currentlyDefendingBender.health < 0 { currentlyDefendingBender.health = 0 }
-//        print("\n---duel---, \(defendingPlayerTrio)")
-//        print(defenderBenderIndex)
         delegate?.startHealthDecreasingAnimation(by: currentlyAttackingBender.attack, currentlyDefendingPlayer: currentlyDefendingPlayerTrio, currentlyDefendingBenderIndex: currentlyDefendingBenderIndex)
         currentlyAttackingBender.attack = attackWithoutAdvantages
     }
@@ -346,16 +363,13 @@ final class SpoonBenders {
         selectedItems[attackerPlayer] = selectedItems[attackerPlayer]!.filter { $0 != attackerBenderIndex }
         selectedItems[defenderPlayer] = selectedItems[defenderPlayer]!.filter { $0 != defenderBenderIndex }
         moves[attackerPlayer] = nil
-        
-//        checkWinConditions()
-//        turnSwitch = true
         updateProperly()
     }
     
     
     func checkIfThereIsUncompletedTeammateMove() -> Bool {
-//        print("checkIfThereIsUncompletedTeammateMove")
-        if let _ = waitingMoves.first {
+        guard !gameFinished else { return false }
+        if waitingMoves.first != nil {
             state += 1
             let attackerPlayerCode = waitingMoves.keys.first!
             let movesByPlayer = waitingMoves.values.first!
@@ -375,33 +389,23 @@ final class SpoonBenders {
     
     
     func checkWinConditions() {
-        print("\n")
         var checkArray: [[Bender]] = []
         var haveLost: [String] = []
         var stillPlaying: [String] = []
 
         for i in 0 ..< numberOfPlayers {
-            print("number of players: \(numberOfPlayers)")
-            print("-4")
             checkArray.append([])
             checkArray[i] = benders[i].filter{ $0.state == .gaveUp }
-            
             if checkArray[i].count == 3 {
-                print("-5")
                 haveLost.append(trios[i])
             } else {
-                print("-6")
                 stillPlaying.append(trios[i])
             }
         }
-        print("LOSERS:")
-        print(losers)
         
         haveLost.forEach { losers.insert($0) }
-//        losers += haveLost
         
         if losers.count == 4 {
-            print("-999")
             gameFinished = true
         }
         
@@ -442,17 +446,14 @@ final class SpoonBenders {
                 gameFinished = true
             }
         }
-        
-        print("LOOOOOOOSERS:")
-        print(losers)
     }
     
     
     // MARK: - Helper Functions
     
     func updateProperly() {
+        guard !gameFinished else { return }
         checkWinConditions()
-        turnSwitch = true
         updateBendersStates()
         delegate?.updateProperly()
     }
@@ -490,7 +491,6 @@ final class SpoonBenders {
                 bender.state = .idle
             }
         }
-        
         for keyValuePair in selectedItems {
             let key = keyValuePair.key
             let playerIndex = getPlayersLocalIndex(playerCode: key)
@@ -527,7 +527,7 @@ final class SpoonBenders {
     
     func getTeammateCode(playerCode: String) -> String {
         let teammateGlobalIndex = getTeammateGlobalIndex(playerCode: playerCode)
-        return playerCodes[teammateGlobalIndex] // IOR
+        return playerCodes[teammateGlobalIndex]
     }
     
     
@@ -591,21 +591,6 @@ final class SpoonBenders {
     }
     
     
-    func didClean() {
-        moves.removeAll()
-        selectedItems.removeAll()
-        updateProperly()
-    }
-    
-    
-    func toggleAttackStarted(byPlayer: String, to: Bool) {
-//        print("toggleAttackStarted")
-        attackStarted = to
-        let message = to ? "Attack-Started:\(byPlayer)" : "Attack-Stopped:\(byPlayer)"
-        gameCommunication.publishMessage(message: message)
-    }
-    
-    
     func disconnect() {
         gameCommunication.publishMessage(message: "Disconnected:\(player.playerCode)")
     }
@@ -646,7 +631,6 @@ extension SpoonBenders: GameCommunicationDelegate {
         }
         gameCommunication.gameStarted = true
         delegate?.goForGameVc()
-//        print(gameCommunication.moveState)
     }
     
     
@@ -662,6 +646,23 @@ extension SpoonBenders: GameCommunicationDelegate {
     
     func didPlayerDrop(playerCode: String) {
         if gameCommunication.gameStarted {
+            if let selectedTrios = moves[playerCode] {
+                selectedTrios.forEach { (trio, index) in
+                    selectedItems[trio] = selectedItems[trio]?.filter { $0 != index }
+                }
+            }
+            let playersStillPlaying = playerCodes.filter { $0 != playerCode }
+            playersStillPlaying.forEach { playerStillPlaying in
+                if let movesByPlayer = moves[playerStillPlaying] {
+                    movesByPlayer.forEach { (trio, index) in
+                        if trio == playerCode {
+                            moves[playerStillPlaying] = moves[playerStillPlaying]!.filter { $0.key != trio }
+                        }
+                    }
+                }
+            }
+            moves[playerCode] = nil
+            selectedItems[playerCode] = nil
             dropped.insert(playerCode)
             losers.insert(playerCode)
             let localIndex = getPlayersLocalIndex(playerCode: playerCode)
@@ -671,9 +672,11 @@ extension SpoonBenders: GameCommunicationDelegate {
                 let localTeammateIndex = getPlayersLocalIndex(playerCode: teammates[playerCode]!)
                 benders[localTeammateIndex].forEach { $0.health = 0 }
             }
-//            print(playerCodes)
-//            print(losers)
-//            print(teammates)
+            if gameMode != .ffa {
+                gameFinished = true
+                checkWinConditions()
+                delegate?.updateProperly()
+            }
         }
     }
 }

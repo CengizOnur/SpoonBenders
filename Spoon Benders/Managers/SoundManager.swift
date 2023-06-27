@@ -2,25 +2,28 @@
 //  SoundManager.swift
 //  Spoon Benders
 //
-//  Created by con akd on 31.03.2023.
+//  Created by Onur Akdogan on 31.03.2023.
 //
 
 import Foundation
 import AVFoundation
 
-class SoundManager {
+final class SoundManager {
     
     var player: AVAudioPlayer!
     var isSoundOpen = true
     
     
-    func playSound() {
+    func play(_ sound: SoundType) {
         guard isSoundOpen else { return }
         
+        let soundName = sound.rawValue
         let noUrl = URL(string: "noUrl")!
-        let url = Bundle.main.url(forResource: "B", withExtension: "wav")
+        let url = Bundle.main.url(forResource: soundName, withExtension: "wav")
         
         player = try? AVAudioPlayer(contentsOf: url ?? noUrl)
+        
+        player.prepareToPlay()
         player.play()
     }
     

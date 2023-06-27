@@ -2,7 +2,7 @@
 //  AnimationManager.swift
 //  Spoon Benders
 //
-//  Created by Con Dog on 13.03.2022.
+//  Created by Onur Akdogan on 13.03.2022.
 //
 
 import Foundation
@@ -14,7 +14,7 @@ protocol AnimationManagerDelegate: AnyObject {
 }
 
 
-class AnimationManager: NSObject, CAAnimationDelegate {
+final class AnimationManager: NSObject, CAAnimationDelegate {
     
     weak var animator: AnimationManagerDelegate?
     

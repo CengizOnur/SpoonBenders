@@ -12,7 +12,7 @@ final class PreparationVC: UIViewController {
     private var avatarName = "wizardBlue"
     private let avatars = ["wizardBlue", "sage", "witch", "snowman", "reaper"]
     
-    private lazy var nicknameField: UITextField = {
+    private lazy var nicknameField: CustomTextField = {
         if let textField = profileView.nicknameLabelOrField as? CustomTextField {
             return textField
         } else {
@@ -28,12 +28,11 @@ final class PreparationVC: UIViewController {
         if let textField = profileView.nicknameLabelOrField as? CustomTextField {
             textField.delegate = self
             textField.placeholder = "Nickname"
-            textField.text = "A"
         }
         return profileView
     }()
     
-    private lazy var createGameLabel: UILabel = {
+    private lazy var createGameLabel: CustomLabel = {
         let label = CustomLabel(textAlignment: .center)
         label.backgroundColor = .clear
         label.text = "Create new game and invite your friends"
@@ -43,7 +42,7 @@ final class PreparationVC: UIViewController {
         return label
     }()
     
-    private lazy var chooseAvatarLabel: UILabel = {
+    private lazy var chooseAvatarLabel: CustomLabel = {
         let label = CustomLabel(textAlignment: .center)
         label.backgroundColor = .black.withAlphaComponent(0.5)
         label.text = "Pick your avatar"
@@ -54,45 +53,44 @@ final class PreparationVC: UIViewController {
         return label
     }()
     
-    private lazy var createGame1v1Button: UIButton = {
-        let button = CustomButton(backgroundColor: .clear, backgroundImage: UIImage(named: "buttons/purpleButton")!, title: "1v1")
+    private lazy var createGame1v1Button: CustomButton = {
+        let button = CustomButton(backgroundColor: .clear, backgroundImage: UIImage(named: "buttons/orangeButton")!, title: "1v1")
         button.addTarget(self, action: #selector(createGame(_:)), for: .touchUpInside)
         return button
     }()
     
-    private lazy var createGame2v2Button: UIButton = {
-        let button = CustomButton(backgroundColor: .clear, backgroundImage: UIImage(named: "buttons/purpleButton")!, title: "2v2")
+    private lazy var createGame2v2Button: CustomButton = {
+        let button = CustomButton(backgroundColor: .clear, backgroundImage: UIImage(named: "buttons/blueButton")!, title: "2v2")
         button.addTarget(self, action: #selector(createGame(_:)), for: .touchUpInside)
         return button
     }()
     
-    private lazy var createGameFFAButton: UIButton = {
+    private lazy var createGameFFAButton: CustomButton = {
         let button = CustomButton(backgroundColor: .clear, backgroundImage: UIImage(named: "buttons/redButton")!, title: "FFA")
         button.addTarget(self, action: #selector(createGame(_:)), for: .touchUpInside)
         return button
     }()
     
-    private lazy var joinGameLabel: UILabel = {
+    private lazy var joinGameLabel: CustomLabel = {
         let label = CustomLabel(textAlignment: .center)
         label.backgroundColor = .clear
-        label.text = "Join your friends"
+        label.text = "Join your friends' game"
         label.textColor = .white
         label.shadowColor = .black
         label.shadowOffset = CGSize(width: 2, height: 2)
         return label
     }()
     
-    private lazy var joinGameButton: UIButton = {
-        let button = CustomButton(backgroundColor: .clear, backgroundImage: UIImage(named: "buttons/greenButton")!, title: "Join Game")
+    private lazy var joinGameButton: CustomButton = {
+        let button = CustomButton(backgroundColor: .clear, backgroundImage: UIImage(named: "buttons/greenButton")!, title: "Join")
         button.addTarget(self, action: #selector(joinGame), for: .touchUpInside)
         return button
     }()
     
-    private lazy var joinTextField: UITextField = {
+    private lazy var joinTextField: CustomTextField = {
         let textField = CustomTextField()
         textField.delegate = self
         textField.placeholder = "Code"
-        textField.text = "A1"
         return textField
     }()
     
@@ -168,6 +166,8 @@ final class PreparationVC: UIViewController {
         pickerView.delegate = self
         pickerView.dataSource = self
         pickerView.backgroundColor = .black.withAlphaComponent(0.5)
+        pickerView.layer.cornerRadius = 10
+        pickerView.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         return pickerView
     }()
     
@@ -279,7 +279,7 @@ final class PreparationVC: UIViewController {
     private func setup() {
         view.addSubview(profileStackView)
         view.addSubview(gameStackView)
-        view.backgroundImage(named: "backgrounds/example")
+        view.backgroundImage(named: "backgrounds/backgroundPreparation")
         profileView.avatarImageView.image = UIImage(named: "avatars/\(avatarName)")
         view.backgroundColor = .systemBackground
         
@@ -338,6 +338,20 @@ final class PreparationVC: UIViewController {
     }
     
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    
     // MARK: - Go to LobbyVC
     
     @objc private func createGame(_ sender: Any) {
@@ -346,12 +360,13 @@ final class PreparationVC: UIViewController {
             return
         }
         let textOnButton: String = ((sender as! CustomButton).titleLabel?.text)!
-        let LobbyVC = LobbyVC()
+        let lobbyVC = LobbyVC()
         let player = Player(playerNickname: nicknameField.text!, playerImageName: avatarName, playerCode: Int.randomCode, isHost: true)
-        LobbyVC.player = player
-        LobbyVC.gameCode = "\(nicknameField.text!)" + "\(textOnButton.last!)"
-        LobbyVC.gameMode = textOnButton.convertToGameMode
-        navigationController?.pushViewController(LobbyVC, animated: true)
+        lobbyVC.player = player
+        lobbyVC.gameCode = "\(nicknameField.text!.first!)" + "\(Int.randomCode)" + "\(textOnButton.last!)"
+        lobbyVC.gameMode = textOnButton.convertToGameMode
+        dismissKeyboard()
+        navigationController?.pushViewController(lobbyVC, animated: true)
     }
     
     
@@ -364,13 +379,14 @@ final class PreparationVC: UIViewController {
             }
             return
         }
-        let LobbyVC = LobbyVC()
+        let lobbyVC = LobbyVC()
         let player = Player(playerNickname: nicknameField.text!, playerImageName: avatarName, playerCode: Int.randomCode)
-        LobbyVC.player = player
+        lobbyVC.player = player
         let gameCode = joinTextField.text!
-        LobbyVC.gameCode = gameCode
-        LobbyVC.gameMode = String(gameCode.last!).convertToGameMode
-        navigationController?.pushViewController(LobbyVC, animated: true)
+        lobbyVC.gameCode = gameCode
+        lobbyVC.gameMode = String(gameCode.last!).convertToGameMode
+        dismissKeyboard()
+        navigationController?.pushViewController(lobbyVC, animated: true)
     }
 }
 
@@ -419,6 +435,46 @@ extension PreparationVC: UIPickerViewDataSource, UIPickerViewDelegate {
         avatarName = avatars[row]
         let image = UIImage(named: "avatars/\(avatarName)")
         profileView.avatarImageView.image = image
+    }
+}
+
+
+// MARK: - Keyboard
+
+extension PreparationVC {
+    @objc func keyboardWillShow(sender: NSNotification) {
+        guard let userInfo = sender.userInfo,
+              let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue,
+              let currentTextField = UIResponder.currentFirst() as? UITextField else { return }
+        
+        let keyboardTopY = keyboardFrame.cgRectValue.origin.y
+        let convertedTextFieldFrame = view.convert(currentTextField.frame, from: currentTextField.superview)
+        let textFieldBottomY = convertedTextFieldFrame.origin.y + convertedTextFieldFrame.size.height
+        
+        // if searchFields bottom is beneath keyboards bottom, frame goes up
+        if textFieldBottomY > keyboardTopY {
+            let preNewFrameY = -(textFieldBottomY - keyboardTopY) - 24
+            if #available(iOS 11.0, *) {
+                calculateWithSafeBottom(bottom: view.safeAreaInsets.bottom, preNewFrameY: preNewFrameY)
+            } else {
+                calculateWithSafeBottom(bottom: bottomLayoutGuide.length, preNewFrameY: preNewFrameY)
+            }
+        }
+    }
+    
+    
+    @objc func keyboardWillHide(notification: NSNotification) {
+        view.frame.origin.y = 0
+    }
+    
+    
+    func calculateWithSafeBottom(bottom: CGFloat, preNewFrameY: CGFloat) {
+        if bottom > 0 {
+            let newFrameY = preNewFrameY - bottom / 2
+            view.frame.origin.y = newFrameY
+        } else {
+            view.frame.origin.y = preNewFrameY
+        }
     }
 }
 

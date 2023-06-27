@@ -2,7 +2,7 @@
 //  Boys.swift
 //  Spoon Benders
 //
-//  Created by con akd on 20.07.2022.
+//  Created by Onur Akdogan on 20.07.2022.
 //
 
 import Foundation
@@ -16,25 +16,27 @@ class IndividualBoy: IndividualBender {
     var fullHealth: Int
     var health: Int {
         didSet {
-            if health == 0 {
+            if health <= 0 {
+                health = 0
                 state = .gaveUp
             }
         }
     }
     var attack: Int
-    var state: BenderState = .idle
+    var state: BenderState
     weak var opponent: Bender? {
         didSet {
             attack += getBonusAgainstOpponent(attacker: self, defender: opponent)
         }
     }
     
-    init(name: String = "Boy", imageName: String = "boy", fullHealth: Int = 100, health: Int = 100, attack: Int = 25) {
+    init(name: String = "Boy", imageName: String = "boy", fullHealth: Int = 100, health: Int = 100, attack: Int = 25, state: BenderState = .idle) {
         self.name = name
         self.imageName = imageName
         self.fullHealth = fullHealth
         self.health = health
         self.attack = attack
+        self.state = state
     }
     
     
@@ -45,15 +47,16 @@ class IndividualBoy: IndividualBender {
 }
 
 
-class IndividualBoyWithRedHat: IndividualBoy {
+final class IndividualBoyWithRedHat: IndividualBoy {
     
-    override init(name: String = "BoyWithRedHat", imageName: String = "boyWithRedHat", fullHealth: Int = 100, health: Int = 100, attack: Int = 20) {
+    override init(name: String = "BoyWithRedHat", imageName: String = "boyWithRedHat", fullHealth: Int = 100, health: Int = 100, attack: Int = 20, state: BenderState = .idle) {
         super.init()
         self.name = name
         self.imageName = imageName
         self.fullHealth = fullHealth
         self.health = health
         self.attack = attack
+        self.state = state
     }
     
     
@@ -73,13 +76,14 @@ class TeammateBoy: TeammateBender {
     var fullHealth: Int
     var health: Int {
         didSet {
-            if health == 0 {
+            if health <= 0 {
+                health = 0
                 state = .gaveUp
             }
         }
     }
     var attack: Int
-    var state: BenderState = .idle
+    var state: BenderState
     
     weak var opponent: Bender? {
         didSet {
@@ -93,12 +97,13 @@ class TeammateBoy: TeammateBender {
         }
     }
     
-    init(name: String = "Boy", imageName: String = "boy", fullHealth: Int = 100, health: Int = 100, attack: Int = 25, bonusAttackPoint: Int = 0) {
+    init(name: String = "Boy", imageName: String = "boy", fullHealth: Int = 100, health: Int = 100, attack: Int = 25, state: BenderState = .idle) {
         self.name = name
         self.imageName = imageName
         self.fullHealth = fullHealth
         self.health = health
         self.attack = attack
+        self.state = state
     }
     
     
@@ -109,15 +114,16 @@ class TeammateBoy: TeammateBender {
 }
 
 
-class TeammateBoyWithRedHat: TeammateBoy {
+final class TeammateBoyWithRedHat: TeammateBoy {
     
-    override init(name: String = "BoyWithRedHat",imageName: String = "boyWithRedHat", fullHealth: Int = 100, health: Int = 100,  attack: Int = 25, bonusAttackPoint: Int = 0) {
+    override init(name: String = "BoyWithRedHat",imageName: String = "boyWithRedHat", fullHealth: Int = 100, health: Int = 100,  attack: Int = 25, state: BenderState = .idle) {
         super.init()
         self.name = name
         self.imageName = imageName
         self.fullHealth = fullHealth
         self.health = health
         self.attack = attack
+        self.state = state
     }
     
     

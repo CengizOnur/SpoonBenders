@@ -2,7 +2,7 @@
 //  PlayerView.swift
 //  Spoon Benders
 //
-//  Created by con akd on 9.12.2022.
+//  Created by Onur Akdogan on 9.12.2022.
 //
 
 import Foundation
@@ -257,7 +257,6 @@ extension PlayerView: UICollectionViewDataSource {
     
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-//        print("🥹cellForItemAt-2")
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: BenderCell.reuseID, for: indexPath) as! BenderCell
         
         cell.backgroundColor = .clear
@@ -292,7 +291,6 @@ extension PlayerView: UICollectionViewDataSource {
 extension PlayerView: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-//        print("🥹didSelectItemAt-1")
         delegate?.didSelectBender(onPlayer: collectionViewOwnerPlayerCode, at: indexPath)
     }
 }

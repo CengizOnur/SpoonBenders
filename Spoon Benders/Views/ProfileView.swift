@@ -2,7 +2,7 @@
 //  ProfileView.swift
 //  Spoon Benders
 //
-//  Created by Con Dog on 19.05.2022.
+//  Created by Onur Akdogan on 19.05.2022.
 //
 
 import UIKit
@@ -20,9 +20,9 @@ final class ProfileView: UIView {
     
     lazy var fontSize = 32.0
     
-    init(nicknameView: NicknameView = .label, ratioOfnicknameViewToAvatar: Double = 0) {
+    init(nicknameView: NicknameView = .label, ratioOfnicknameViewToAvatar: Double = 0, labelFont: UIFont? = UIFont(name: "Poultrygeist", size: 12)) {
         super.init(frame: CGRect.zero)
-        configure(with: nicknameView, by: ratioOfnicknameViewToAvatar)
+        configure(with: nicknameView, by: ratioOfnicknameViewToAvatar, labelFont: labelFont)
     }
     
     
@@ -33,9 +33,9 @@ final class ProfileView: UIView {
     
     // MARK: - ConfigureUI
     
-    private func configure(with nicknameView: NicknameView, by ratioOfnicknameViewToAvatar: Double) {
+    private func configure(with nicknameView: NicknameView, by ratioOfnicknameViewToAvatar: Double, labelFont: UIFont?) {
         if nicknameView == .label {
-            nicknameLabelOrField = CustomLabel(textAlignment: .center)
+            nicknameLabelOrField = CustomLabel(textAlignment: .center, font: labelFont)
             (nicknameLabelOrField as! CustomLabel).minimumScaleFactor = 0.3
         } else {
             nicknameLabelOrField = CustomTextField()
@@ -55,17 +55,17 @@ final class ProfileView: UIView {
         let imageTrailing = avatarImageView.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor)
         imageTrailing.priority = .defaultHigh
         
-        var nicknameLabelOrFieldHeigth: NSLayoutConstraint
+        var nicknameLabelOrFieldHeight: NSLayoutConstraint
         
         if ratioOfnicknameViewToAvatar == 0 {
-            nicknameLabelOrFieldHeigth = nicknameLabelOrField.heightAnchor.constraint(lessThanOrEqualToConstant: 48)
+            nicknameLabelOrFieldHeight = nicknameLabelOrField.heightAnchor.constraint(lessThanOrEqualToConstant: 48)
         } else {
-            nicknameLabelOrFieldHeigth = nicknameLabelOrField.heightAnchor.constraint(equalTo: avatarImageView.heightAnchor, multiplier: ratioOfnicknameViewToAvatar)
+            nicknameLabelOrFieldHeight = nicknameLabelOrField.heightAnchor.constraint(equalTo: avatarImageView.heightAnchor, multiplier: ratioOfnicknameViewToAvatar)
         }
         
         NSLayoutConstraint.activate([
             nicknameLabelOrField.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -padding),
-            nicknameLabelOrFieldHeigth,
+            nicknameLabelOrFieldHeight,
             
             avatarImageView.bottomAnchor.constraint(equalTo: nicknameLabelOrField.topAnchor, constant: -padding),
             avatarImageView.topAnchor.constraint(equalTo: topAnchor, constant: padding),

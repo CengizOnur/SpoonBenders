@@ -2,7 +2,7 @@
 //  CustomTextField.swift
 //  Spoon Benders
 //
-//  Created by Con Dog on 2.03.2022.
+//  Created by Onur Akdogan on 2.03.2022.
 //
 
 import UIKit
@@ -24,11 +24,15 @@ final class CustomTextField: UITextField {
         translatesAutoresizingMaskIntoConstraints = false
         returnKeyType = .join
         layer.borderColor = UIColor.systemGray4.cgColor
+        leftView = UIView(frame: CGRect(x: 0, y: 0, width: 5, height: 0))
+        leftViewMode = .always
+        rightView = UIView(frame: CGRect(x: 0, y: 0, width: 5, height: 0))
+        rightViewMode = .always
         autocapitalizationType = .none
         textColor = .white
-        tintColor = .label
+        tintColor = .white
         textAlignment = .center
-        font = UIFont.preferredFont(forTextStyle: .title2)
+        font = UIFont(name: "Poultrygeist", size: 24)
         adjustsFontSizeToFitWidth = true
         minimumFontSize = 12
         backgroundColor = .black.withAlphaComponent(0.5)
