@@ -6,10 +6,12 @@
       "scale" : "1x"
     },
     {
+      "filename" : "kittenSelectedLeft5@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "kittenSelectedLeft5@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

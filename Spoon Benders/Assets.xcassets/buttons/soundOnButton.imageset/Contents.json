@@ -1,15 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "iconsounon.png",
+      "filename" : "soundOnButton.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "soundOnButton@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "soundOnButton@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

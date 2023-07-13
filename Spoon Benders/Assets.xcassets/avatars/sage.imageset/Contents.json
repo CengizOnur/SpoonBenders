@@ -1,15 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "0_Sage_Idle_000.png",
+      "filename" : "sage.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "sage@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "sage@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

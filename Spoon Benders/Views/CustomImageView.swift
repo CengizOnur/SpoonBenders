@@ -33,7 +33,7 @@ final class CustomImageView: UIImageView {
     // MARK: - ConfigureUI
     
     private func commonInit() {
-        backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.25)
+        backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.5)
         translatesAutoresizingMaskIntoConstraints = false
         contentMode = .scaleAspectFit
         setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
@@ -48,7 +48,7 @@ final class CustomImageView: UIImageView {
         let divisor: CGFloat
         
         if borderShape == .circle {
-            layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.35).cgColor
+            layer.borderColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5).cgColor
             divisor = 2
         } else {
             divisor = 8

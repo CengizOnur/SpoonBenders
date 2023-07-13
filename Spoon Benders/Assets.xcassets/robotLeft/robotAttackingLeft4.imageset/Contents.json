@@ -6,10 +6,12 @@
       "scale" : "1x"
     },
     {
+      "filename" : "robotAttackingLeft4@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "robotAttackingLeft4@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

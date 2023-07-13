@@ -21,7 +21,7 @@ enum Position {
 }
 
 
-enum BenderPosition {
+enum BenderPosition: String {
     case left
     case right
 }
@@ -30,7 +30,7 @@ enum BenderPosition {
 final class PlayerView: UIView {
     
     private var playerCode = "0"
-    private var collectionViewOwnerPlayerCode = "0"
+    var collectionViewOwnerPlayerCode = "0"
     var benders = [Bender]()
     
     weak var delegate: BenderSelection?

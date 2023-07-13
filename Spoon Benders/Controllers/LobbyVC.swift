@@ -17,8 +17,10 @@ final class LobbyVC: UIViewController {
     
     private lazy var gameLabel: CustomLabel = {
         let label = CustomLabel(textAlignment: .center)
-        label.text = "Game code: " + gameCode
-        label.textColor = .white
+        let str = "Game code: " + gameCode
+        var mutableString = NSMutableAttributedString(string: str)
+        mutableString.addAttribute(.foregroundColor, value: UIColor.green, range: NSRange(location: 11,length: 5))
+        label.attributedText = mutableString
         return label
     }()
     
@@ -95,8 +97,8 @@ final class LobbyVC: UIViewController {
     
     
     private func setsizesByTraitCollection(newCollection: UITraitCollection) {
-        statusLabel.font = UIFont(name: "Poultrygeist", size: newCollection.fontSizeBySizeClass)
-        gameLabel.font = UIFont(name: "Poultrygeist", size: newCollection.fontSizeBySizeClass)
+        gameLabel.font = gameLabel.font.withSize(newCollection.fontSizeBySizeClass)
+        statusLabel.font = statusLabel.font.withSize(newCollection.fontSizeBySizeClass)
         
         var spacingCoefficient: CGFloat {
             // iPad Mini (6th gen) logical width(in landscape it corresponds height): 744

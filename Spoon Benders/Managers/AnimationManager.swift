@@ -19,12 +19,15 @@ final class AnimationManager: NSObject, CAAnimationDelegate {
     weak var animator: AnimationManagerDelegate?
     
     
-    // MARK: - Spoon moves from attacker benders position to defender benders position
+    // MARK: - Throwable object moves from attacker benders position to defender benders position
     
-    func throwSpoon(by player: String, from: CGPoint, to: CGPoint, spoon: UIView, duelType: DuelType) {
+    func throwObject(by player: String, from: CGPoint, to: CGPoint, throwableObject: UIView, duelType: DuelType) {
         let animation = CABasicAnimation(keyPath: "position")
         
-        rotateSpoon(imageView: spoon as! UIImageView, aCircleTime: 0.5)
+        if let animatedImages = (throwableObject as? UIImageView)?.animationImages,
+           animatedImages.count == 1 {
+            rotateSpoon(imageView: throwableObject as! UIImageView, aCircleTime: 0.5)
+        }
         
         animation.fromValue = from
         animation.toValue = to
@@ -37,11 +40,11 @@ final class AnimationManager: NSObject, CAAnimationDelegate {
         animation.setValue(player, forKey: "attackAnimation.player")
         animation.setValue(from, forKey: "attackAnimation.from")
         animation.setValue(to, forKey: "attackAnimation.to")
-        animation.setValue(spoon, forKey: "attackAnimation.spoon")
-        animation.setValue(spoon.layer, forKey: "attackAnimation.layer")
+        animation.setValue(throwableObject, forKey: "attackAnimation.throwableObject")
+        animation.setValue(throwableObject.layer, forKey: "attackAnimation.layer")
         animation.setValue(duelType, forKey: "attackAnimation.duelType")
         
-        spoon.layer.add(animation, forKey: "attackAnimation.animation")
+        throwableObject.layer.add(animation, forKey: "attackAnimation.animation")
     }
     
     
@@ -62,7 +65,7 @@ final class AnimationManager: NSObject, CAAnimationDelegate {
     
     // MARK: - Benders Health Decreasing After Attack
     
-    func decreaseHealth(from: CGPoint, to: CGPoint, spoon: UIView) {
+    func decreaseHealth(from: CGPoint, to: CGPoint, throwableObject: UIView) {
         let animation = CABasicAnimation(keyPath: "position")
         
         animation.fromValue = from
@@ -75,10 +78,10 @@ final class AnimationManager: NSObject, CAAnimationDelegate {
         
         animation.setValue(from, forKey: "attackAnimation.from")
         animation.setValue(to, forKey: "attackAnimation.to")
-        animation.setValue(spoon, forKey: "decreasingHealthAnimation.health")
-        animation.setValue(spoon.layer, forKey: "attackAnimation.layer")
+        animation.setValue(throwableObject, forKey: "decreasingHealthAnimation.health")
+        animation.setValue(throwableObject.layer, forKey: "attackAnimation.layer")
         
-        spoon.layer.add(animation, forKey: "attackAnimation.animation")
+        throwableObject.layer.add(animation, forKey: "attackAnimation.animation")
     }
     
     
@@ -86,7 +89,7 @@ final class AnimationManager: NSObject, CAAnimationDelegate {
     
     func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
         
-        if let _ = anim.value(forKey: "attackAnimation.spoon") as? UIView {
+        if let _ = anim.value(forKey: "attackAnimation.throwableObject") as? UIView {
             finishedThrowingAnimation(anim)
         } else if let _ = anim.value(forKey: "decreasingHealthAnimation.health") as? UIView {
             finishedDecreasingHealthAnimation(anim)
@@ -97,8 +100,8 @@ final class AnimationManager: NSObject, CAAnimationDelegate {
     // MARK: - Handle Animation Results
     
     func finishedThrowingAnimation(_ anim: CAAnimation) {
-        let spoon = anim.value(forKey: "attackAnimation.spoon") as! UIView
-        spoon.removeFromSuperview()
+        let throwableObject = anim.value(forKey: "attackAnimation.throwableObject") as! UIView
+        throwableObject.removeFromSuperview()
         let layer = anim.value(forKey: "attackAnimation.layer") as! CALayer
         layer.removeFromSuperlayer()
         
@@ -110,8 +113,8 @@ final class AnimationManager: NSObject, CAAnimationDelegate {
     
     
     func finishedDecreasingHealthAnimation(_ anim: CAAnimation) {
-        let spoon = anim.value(forKey: "decreasingHealthAnimation.health") as! UIView
-        spoon.removeFromSuperview()
+        let throwableObject = anim.value(forKey: "decreasingHealthAnimation.health") as! UIView
+        throwableObject.removeFromSuperview()
         let layer = anim.value(forKey: "attackAnimation.layer") as! CALayer
         layer.removeFromSuperlayer()
     }

@@ -1,15 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "0_Reaper_Man_Slashing_011.png",
+      "filename" : "reaper.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "reaper@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "reaper@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

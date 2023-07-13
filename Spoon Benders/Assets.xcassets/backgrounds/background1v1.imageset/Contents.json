@@ -1,15 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "4_game_background.png",
+      "filename" : "background1v1.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "background1v1@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "background1v1@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

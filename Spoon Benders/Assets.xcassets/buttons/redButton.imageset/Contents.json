@@ -1,15 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "CGB02-red_L_btn.png",
+      "filename" : "redButton.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "redButton@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "redButton@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

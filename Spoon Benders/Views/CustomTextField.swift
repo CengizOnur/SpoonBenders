@@ -23,7 +23,7 @@ final class CustomTextField: UITextField {
     private func configure() {
         translatesAutoresizingMaskIntoConstraints = false
         returnKeyType = .join
-        layer.borderColor = UIColor.systemGray4.cgColor
+        layer.borderColor = UIColor(red: 1, green: 1, blue: 1, alpha: 0.5).cgColor
         leftView = UIView(frame: CGRect(x: 0, y: 0, width: 5, height: 0))
         leftViewMode = .always
         rightView = UIView(frame: CGRect(x: 0, y: 0, width: 5, height: 0))

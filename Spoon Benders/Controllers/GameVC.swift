@@ -501,7 +501,7 @@ final class GameVC: UIViewController {
         let currentPlayerIndex = game.getCurrentPlayersLocalIndex()
         let playerView = playerViews[currentPlayerIndex]
         playerViews.forEach { playerView in
-            playerView.profileView.avatarImageView.layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.35).cgColor
+            playerView.profileView.avatarImageView.layer.borderColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.5).cgColor
         }
         playerView.profileView.avatarImageView.layer.borderColor = UIColor.green.cgColor
     }
@@ -709,6 +709,12 @@ final class GameVC: UIViewController {
     }
     
     
+    func getPlayerView(collectionView: UICollectionView) -> PlayerView {
+        let playerView = playerViews.filter { $0.collectionView === collectionView }.first!
+        return playerView
+    }
+    
+    
     private func showProperEndMessage() {
         if game.gameMode == .twoVsTwo {
             let theWinners = game.winners.map { playerCode in
@@ -775,16 +781,24 @@ extension GameVC: AnimationManagerDelegate {
         let attackerBenderPosition = takeCellLocation(collectionView: attackersCollectionView, index: attackerBenderIndex)
         let defenderBenderPosition = takeCellLocation(collectionView: defendersCollectionView, index: defenderBenderIndex)
         
-        startAttackAnimation(by: playerCode, from: attackerBenderPosition, to: defenderBenderPosition, duelType: duelType)
+        let currentlyAttackingTrio = duelType == .firstAttack ? attackersTrio : defendersTrio
+        let currentlyAttackingPlayerIndex = game.getPlayersLocalIndex(playerCode: currentlyAttackingTrio)
+        let currentlyAttackingBenderIndex = duelType == .firstAttack ? attackerBenderIndex : defenderBenderIndex
+        let throwableObjectConstant = game.benderNumbers[currentlyAttackingPlayerIndex][currentlyAttackingBenderIndex]
+        
+        let currentlyAttackingCollectionView = duelType == .firstAttack ? attackersCollectionView : defendersCollectionView
+        let benderPosition = getPlayerView(collectionView: currentlyAttackingCollectionView).bendersPosition
+        
+        startAttackAnimation(by: playerCode, from: attackerBenderPosition, to: defenderBenderPosition, duelType: duelType, throwableObjectConstant: throwableObjectConstant, throwingFrom: benderPosition)
     }
     
 
-    private func startAttackAnimation(by player: String, from attackerPosition: CGPoint, to defenderPosition: CGPoint, duelType: DuelType) {
-        let spoon = makeSpoon()
+    private func startAttackAnimation(by player: String, from attackerPosition: CGPoint, to defenderPosition: CGPoint, duelType: DuelType, throwableObjectConstant: Int, throwingFrom: BenderPosition) {
+        let throwableObject = makeThrowableObject(throwableObjectConstant: throwableObjectConstant, throwingFrom: throwingFrom)
         if duelType == .firstAttack {
-            animationManager.throwSpoon(by: player, from: attackerPosition, to: defenderPosition, spoon: spoon, duelType: duelType)
+            animationManager.throwObject(by: player, from: attackerPosition, to: defenderPosition, throwableObject: throwableObject, duelType: duelType)
         } else {
-            animationManager.throwSpoon(by: player, from: defenderPosition, to: attackerPosition, spoon: spoon, duelType: duelType)
+            animationManager.throwObject(by: player, from: defenderPosition, to: attackerPosition, throwableObject: throwableObject, duelType: duelType)
         }
     }
     
@@ -795,21 +809,50 @@ extension GameVC: AnimationManagerDelegate {
         let defenderBenderPosition = takeCellLocation(collectionView: currentlyDefendingPlayersCollectionView, index: currentlyDefendingBenderIndex)
         let healthBubbleView = makeHealthBubbleView(withNumber: opponentsAttack)
         let deltaX: CGFloat = Int.random(in: 1..<3) == 1 ? -50 : +50
-        animationManager.decreaseHealth(from: defenderBenderPosition, to: CGPoint(x: defenderBenderPosition.x + deltaX, y: defenderBenderPosition.y - 50), spoon: healthBubbleView)
+        animationManager.decreaseHealth(from: defenderBenderPosition, to: CGPoint(x: defenderBenderPosition.x + deltaX, y: defenderBenderPosition.y - 50), throwableObject: healthBubbleView)
     }
     
     
-    private func makeSpoon() -> UIView {
-        let spoon = UIImageView(image: UIImage(named: "spoons/spoon"))
-        spoon.translatesAutoresizingMaskIntoConstraints = false
-        spoon.backgroundColor = .clear
-        view.addSubview(spoon)
-        spoon.trailingAnchor.constraint(equalTo: view.leadingAnchor, constant: -200).isActive = true
-        spoon.bottomAnchor.constraint(equalTo: view.topAnchor, constant: -200).isActive = true
-        spoon.heightAnchor.constraint(equalToConstant: 40).isActive = true
-        spoon.widthAnchor.constraint(equalTo: spoon.heightAnchor, multiplier: 1).isActive = true
+    private func makeThrowableObject(throwableObjectConstant: Int, throwingFrom: BenderPosition) -> UIView {
         
-        return spoon
+        /// Instead of using random numbers for a move,
+        /// it is using arbitrary numbers for a game depends on current bender index and benders which already are created by random numbers
+        let throwableObjectTypeNumber = (game.benderNumbers.flatMap { $0 }.reduce(0, +) + throwableObjectConstant) % 3
+        
+        let throwableObjectType = throwableObjectTypeNumber.throwableObjectType
+        let throwingSide: BenderPosition? = throwableObjectType == .bat ? throwingFrom : nil
+        let extraSize: CGFloat = throwableObjectType == .bat ? 8 : 0
+        
+        let throwableObjectImageView = UIImageView()
+        throwableObjectImageView.stopAnimating()
+        throwableObjectImageView.animationImages = animatedImages(for: throwableObjectType, throwingFrom: throwingSide)
+        throwableObjectImageView.animationDuration = 1.1
+        throwableObjectImageView.animationRepeatCount = 0
+        throwableObjectImageView.image = throwableObjectImageView.animationImages?.first
+        throwableObjectImageView.startAnimating()
+        throwableObjectImageView.translatesAutoresizingMaskIntoConstraints = false
+        throwableObjectImageView.backgroundColor = .clear
+        
+        view.addSubview(throwableObjectImageView)
+        throwableObjectImageView.trailingAnchor.constraint(equalTo: view.leadingAnchor, constant: -200).isActive = true
+        throwableObjectImageView.bottomAnchor.constraint(equalTo: view.topAnchor, constant: -200).isActive = true
+        throwableObjectImageView.heightAnchor.constraint(equalToConstant: traitCollection.fontSizeBySizeClass + 16 + extraSize).isActive = true
+        throwableObjectImageView.widthAnchor.constraint(equalTo: throwableObjectImageView.heightAnchor, multiplier: 1).isActive = true
+        
+        return throwableObjectImageView
+    }
+    
+    
+    func animatedImages(for throwableObjectType: ThrowableObjectType, throwingFrom: BenderPosition? = nil) -> [UIImage] {
+        var images = [UIImage]()
+        let imageName = "throwableObjects/\(throwableObjectType)"
+        let benderSide = throwingFrom != nil ? "\(throwingFrom!)".firstUppercased : ""
+        var i = 1
+        while let image = UIImage(named: "\(imageName)\(benderSide)\(i)") {
+            images.append(image)
+            i += 1
+        }
+        return images
     }
     
     

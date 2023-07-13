@@ -23,6 +23,15 @@ extension String {
             return .oneVsOne
         }
     }
+    
+    static var randomLetter: String {
+        
+        /// Because of the font, which is a good font, letters O and I looks like 0 (zero) and 1(one). To prevent that there will be no O and I in game code.
+        let allLettersExceptOAndI = "abcdefghjklmnpqrstuvwxyz"
+        
+        let randomLetter = allLettersExceptOAndI.randomElement()!.uppercased()
+        return randomLetter
+    }
 }
 
 

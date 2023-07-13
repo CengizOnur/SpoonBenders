@@ -6,10 +6,12 @@
       "scale" : "1x"
     },
     {
+      "filename" : "catAttackingRight8@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "catAttackingRight8@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

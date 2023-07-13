@@ -1,15 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "1_IDLE_004.png",
+      "filename" : "wizardRed.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "wizardRed@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "wizardRed@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

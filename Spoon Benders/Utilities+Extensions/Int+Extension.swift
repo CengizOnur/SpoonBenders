@@ -9,9 +9,22 @@ import Foundation
 
 extension Int {
     
-    static var randomCode: String {
-        let randomNumber = Int.random(in: 0..<200)
-        return String(randomNumber)
+    var throwableObjectType: ThrowableObjectType {
+        switch self {
+        case 0:
+            return .spoon
+        case 1:
+            return .pumpkinGhost
+        case 2:
+            return .bat
+        default:
+            return .spoon
+        }
+    }
+    
+    static var randomNumber: Int {
+        let randomNumber = Int.random(in: 100..<999)
+        return randomNumber
     }
     
     

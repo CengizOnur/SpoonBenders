@@ -6,10 +6,12 @@
       "scale" : "1x"
     },
     {
+      "filename" : "ninjagirlAttackingRight1@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "ninjagirlAttackingRight1@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

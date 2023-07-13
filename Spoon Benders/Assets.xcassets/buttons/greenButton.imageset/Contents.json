@@ -1,15 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "CGB02-green_L_btn.png",
+      "filename" : "greenButton.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "greenButton@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "greenButton@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

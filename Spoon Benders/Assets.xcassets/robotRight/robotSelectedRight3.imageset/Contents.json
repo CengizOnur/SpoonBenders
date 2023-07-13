@@ -6,10 +6,12 @@
       "scale" : "1x"
     },
     {
+      "filename" : "robotSelectedRight3@2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
+      "filename" : "robotSelectedRight3@3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

@@ -11,6 +11,12 @@ import UIKit
 
 extension UITraitCollection {
     
+    /// To determine coefficient of player views in game
+    enum Orientation {
+        case portrait
+        case landscape
+    }
+    
     var constantBySizeClass: CGFloat {
         if horizontalSizeClass == .compact
             || verticalSizeClass == .compact {

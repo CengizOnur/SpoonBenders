@@ -10,7 +10,7 @@ import UIKit
 final class PreparationVC: UIViewController {
     
     private var avatarName = "wizardBlue"
-    private let avatars = ["wizardBlue", "sage", "witch", "snowman", "reaper"]
+    private let avatars = ["wizardBlue", "sage", "witch", "snowman", "reaper", "wizardPurple", "wizardRed"]
     
     private lazy var nicknameField: CustomTextField = {
         if let textField = profileView.nicknameLabelOrField as? CustomTextField {
@@ -361,9 +361,9 @@ final class PreparationVC: UIViewController {
         }
         let textOnButton: String = ((sender as! CustomButton).titleLabel?.text)!
         let lobbyVC = LobbyVC()
-        let player = Player(playerNickname: nicknameField.text!, playerImageName: avatarName, playerCode: Int.randomCode, isHost: true)
+        let player = Player(playerNickname: nicknameField.text!, playerImageName: avatarName, playerCode: "\(Int.randomNumber)", isHost: true)
         lobbyVC.player = player
-        lobbyVC.gameCode = "\(nicknameField.text!.first!)" + "\(Int.randomCode)" + "\(textOnButton.last!)"
+        lobbyVC.gameCode = String.randomLetter + "\(Int.randomNumber)" + "\(textOnButton.last!)"
         lobbyVC.gameMode = textOnButton.convertToGameMode
         dismissKeyboard()
         navigationController?.pushViewController(lobbyVC, animated: true)
@@ -373,16 +373,16 @@ final class PreparationVC: UIViewController {
     @objc private func joinGame() {
         guard isCodeEntered && isNicknameEntered else {
             if !isNicknameEntered {
-                presentAlert(title: "Missing Nickname", message: "You need nickname", buttonTitle: "Ok")
+                presentAlert(title: "Missing Nickname", message: "You need a nickname", buttonTitle: "Ok")
             } else {
                 presentAlert(title: "Missing Code", message: "Enter invitation code to join a game", buttonTitle: "Ok")
             }
             return
         }
         let lobbyVC = LobbyVC()
-        let player = Player(playerNickname: nicknameField.text!, playerImageName: avatarName, playerCode: Int.randomCode)
+        let player = Player(playerNickname: nicknameField.text!, playerImageName: avatarName, playerCode: "\(Int.randomNumber)")
         lobbyVC.player = player
-        let gameCode = joinTextField.text!
+        let gameCode = joinTextField.text!.uppercased()
         lobbyVC.gameCode = gameCode
         lobbyVC.gameMode = String(gameCode.last!).convertToGameMode
         dismissKeyboard()

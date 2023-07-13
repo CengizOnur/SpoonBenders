@@ -35,15 +35,16 @@ enum BenderState {
 }
 
 
-enum Orientation {
-    case portrait
-    case landscape
-}
-
-
 enum SoundType: String {
     case turn
     case select
     case notSelected
     case attack
+}
+
+
+enum ThrowableObjectType: String {
+    case spoon
+    case pumpkinGhost
+    case bat
 }
