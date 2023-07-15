@@ -13,15 +13,15 @@ Realtime Multiplayer Game
 
 ### Gifs (4 gif files that take time to load)
 
-![1](https://github.com/CengizOnur/OnrPublic/blob/main/gifsSpoonBenders/Jul-15-2023%2001-50-36.gif)
+<img src="https://github.com/CengizOnur/OnrPublic/blob/main/gifsSpoonBenders/Jul-15-2023%2001-50-36.gif" alt="Preparation gif">
 
-![2](https://github.com/CengizOnur/OnrPublic/blob/main/gifsSpoonBenders/Jul-15-2023%2001-34-09.gif)
+<img src="https://github.com/CengizOnur/OnrPublic/blob/main/gifsSpoonBenders/Jul-15-2023%2001-34-09.gif" alt="1v1 gif">
 
-![3](https://github.com/CengizOnur/OnrPublic/blob/main/gifsSpoonBenders/Jul-15-2023%2000-54-54.gif)
+<img src="https://github.com/CengizOnur/OnrPublic/blob/main/gifsSpoonBenders/Jul-15-2023%2000-54-54.gif" alt="FFA gif">
 
-![4](https://github.com/CengizOnur/OnrPublic/blob/main/gifsSpoonBenders/Jul-14-2023%2023-34-32.gif)
+<img src="https://github.com/CengizOnur/OnrPublic/blob/main/gifsSpoonBenders/Jul-14-2023%2023-34-32.gif" alt="2v2 gif">
 
 
 ## An Image
 
-![5](https://github.com/CengizOnur/OnrPublic/blob/main/imagesSpoonBenders/Screenshot%202023-07-15%20at%2010.52.54.png)
+<img src="https://github.com/CengizOnur/OnrPublic/blob/main/imagesSpoonBenders/Screenshot%202023-07-15%20at%2010.52.54.png" alt="2v2 image">
